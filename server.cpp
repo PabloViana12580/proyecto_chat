@@ -27,7 +27,7 @@ bool serverON = 1;
 
 int managementServer(int fd)
 {
-
+	
 }
 
 //Funcion para desplegar errores y salir del programa
