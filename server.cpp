@@ -51,7 +51,6 @@ int checkUser(int fd, string username)
 		if (current_clients[i].fd != -1 &&
 			username.compare(current_clients[i].username) == 0
 		){
-			MyInfoResponse
 			return 1;
 		}
 	}
