@@ -2330,24 +2330,17 @@ class DirectMessage :
   std::string* _internal_mutable_message();
   public:
 
-  // required string userId = 2;
+  // required int32 userId = 2;
   bool has_userid() const;
   private:
   bool _internal_has_userid() const;
   public:
   void clear_userid();
-  const std::string& userid() const;
-  void set_userid(const std::string& value);
-  void set_userid(std::string&& value);
-  void set_userid(const char* value);
-  void set_userid(const char* value, size_t size);
-  std::string* mutable_userid();
-  std::string* release_userid();
-  void set_allocated_userid(std::string* userid);
+  ::PROTOBUF_NAMESPACE_ID::int32 userid() const;
+  void set_userid(::PROTOBUF_NAMESPACE_ID::int32 value);
   private:
-  const std::string& _internal_userid() const;
-  void _internal_set_userid(const std::string& value);
-  std::string* _internal_mutable_userid();
+  ::PROTOBUF_NAMESPACE_ID::int32 _internal_userid() const;
+  void _internal_set_userid(::PROTOBUF_NAMESPACE_ID::int32 value);
   public:
 
   // @@protoc_insertion_point(class_scope:chat.DirectMessage)
@@ -2361,7 +2354,7 @@ class DirectMessage :
   ::PROTOBUF_NAMESPACE_ID::internal::HasBits<1> _has_bits_;
   mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr message_;
-  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr userid_;
+  ::PROTOBUF_NAMESPACE_ID::int32 userid_;
   friend struct ::TableStruct_mensaje_2eproto;
 };
 // -------------------------------------------------------------------
@@ -2631,6 +2624,7 @@ class ClientMessage :
     kChangeStatusFieldNumber = 5,
     kBroadcastFieldNumber = 6,
     kDirectMessageFieldNumber = 7,
+    kAcknowledgeFieldNumber = 8,
     kOptionFieldNumber = 1,
     kUserIdFieldNumber = 2,
   };
@@ -2709,6 +2703,21 @@ class ClientMessage :
   ::chat::DirectMessageRequest* _internal_mutable_directmessage();
   public:
 
+  // optional .chat.MyInfoAcknowledge acknowledge = 8;
+  bool has_acknowledge() const;
+  private:
+  bool _internal_has_acknowledge() const;
+  public:
+  void clear_acknowledge();
+  const ::chat::MyInfoAcknowledge& acknowledge() const;
+  ::chat::MyInfoAcknowledge* release_acknowledge();
+  ::chat::MyInfoAcknowledge* mutable_acknowledge();
+  void set_allocated_acknowledge(::chat::MyInfoAcknowledge* acknowledge);
+  private:
+  const ::chat::MyInfoAcknowledge& _internal_acknowledge() const;
+  ::chat::MyInfoAcknowledge* _internal_mutable_acknowledge();
+  public:
+
   // required int32 option = 1;
   bool has_option() const;
   private:
@@ -2747,6 +2756,7 @@ class ClientMessage :
   ::chat::ChangeStatusRequest* changestatus_;
   ::chat::BroadcastRequest* broadcast_;
   ::chat::DirectMessageRequest* directmessage_;
+  ::chat::MyInfoAcknowledge* acknowledge_;
   ::PROTOBUF_NAMESPACE_ID::int32 option_;
   ::PROTOBUF_NAMESPACE_ID::int32 userid_;
   friend struct ::TableStruct_mensaje_2eproto;
@@ -4390,7 +4400,7 @@ inline void DirectMessage::set_allocated_message(std::string* message) {
   // @@protoc_insertion_point(field_set_allocated:chat.DirectMessage.message)
 }
 
-// required string userId = 2;
+// required int32 userId = 2;
 inline bool DirectMessage::_internal_has_userid() const {
   bool value = (_has_bits_[0] & 0x00000002u) != 0;
   return value;
@@ -4399,66 +4409,23 @@ inline bool DirectMessage::has_userid() const {
   return _internal_has_userid();
 }
 inline void DirectMessage::clear_userid() {
-  userid_.ClearToEmptyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+  userid_ = 0;
   _has_bits_[0] &= ~0x00000002u;
 }
-inline const std::string& DirectMessage::userid() const {
+inline ::PROTOBUF_NAMESPACE_ID::int32 DirectMessage::_internal_userid() const {
+  return userid_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int32 DirectMessage::userid() const {
   // @@protoc_insertion_point(field_get:chat.DirectMessage.userId)
   return _internal_userid();
 }
-inline void DirectMessage::set_userid(const std::string& value) {
+inline void DirectMessage::_internal_set_userid(::PROTOBUF_NAMESPACE_ID::int32 value) {
+  _has_bits_[0] |= 0x00000002u;
+  userid_ = value;
+}
+inline void DirectMessage::set_userid(::PROTOBUF_NAMESPACE_ID::int32 value) {
   _internal_set_userid(value);
   // @@protoc_insertion_point(field_set:chat.DirectMessage.userId)
-}
-inline std::string* DirectMessage::mutable_userid() {
-  // @@protoc_insertion_point(field_mutable:chat.DirectMessage.userId)
-  return _internal_mutable_userid();
-}
-inline const std::string& DirectMessage::_internal_userid() const {
-  return userid_.GetNoArena();
-}
-inline void DirectMessage::_internal_set_userid(const std::string& value) {
-  _has_bits_[0] |= 0x00000002u;
-  userid_.SetNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), value);
-}
-inline void DirectMessage::set_userid(std::string&& value) {
-  _has_bits_[0] |= 0x00000002u;
-  userid_.SetNoArena(
-    &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::move(value));
-  // @@protoc_insertion_point(field_set_rvalue:chat.DirectMessage.userId)
-}
-inline void DirectMessage::set_userid(const char* value) {
-  GOOGLE_DCHECK(value != nullptr);
-  _has_bits_[0] |= 0x00000002u;
-  userid_.SetNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::string(value));
-  // @@protoc_insertion_point(field_set_char:chat.DirectMessage.userId)
-}
-inline void DirectMessage::set_userid(const char* value, size_t size) {
-  _has_bits_[0] |= 0x00000002u;
-  userid_.SetNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
-      ::std::string(reinterpret_cast<const char*>(value), size));
-  // @@protoc_insertion_point(field_set_pointer:chat.DirectMessage.userId)
-}
-inline std::string* DirectMessage::_internal_mutable_userid() {
-  _has_bits_[0] |= 0x00000002u;
-  return userid_.MutableNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
-}
-inline std::string* DirectMessage::release_userid() {
-  // @@protoc_insertion_point(field_release:chat.DirectMessage.userId)
-  if (!_internal_has_userid()) {
-    return nullptr;
-  }
-  _has_bits_[0] &= ~0x00000002u;
-  return userid_.ReleaseNonDefaultNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
-}
-inline void DirectMessage::set_allocated_userid(std::string* userid) {
-  if (userid != nullptr) {
-    _has_bits_[0] |= 0x00000002u;
-  } else {
-    _has_bits_[0] &= ~0x00000002u;
-  }
-  userid_.SetAllocatedNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), userid);
-  // @@protoc_insertion_point(field_set_allocated:chat.DirectMessage.userId)
 }
 
 // -------------------------------------------------------------------
@@ -4542,7 +4509,7 @@ inline void ErrorResponse::set_allocated_errormessage(std::string* errormessage)
 
 // required int32 option = 1;
 inline bool ClientMessage::_internal_has_option() const {
-  bool value = (_has_bits_[0] & 0x00000020u) != 0;
+  bool value = (_has_bits_[0] & 0x00000040u) != 0;
   return value;
 }
 inline bool ClientMessage::has_option() const {
@@ -4550,7 +4517,7 @@ inline bool ClientMessage::has_option() const {
 }
 inline void ClientMessage::clear_option() {
   option_ = 0;
-  _has_bits_[0] &= ~0x00000020u;
+  _has_bits_[0] &= ~0x00000040u;
 }
 inline ::PROTOBUF_NAMESPACE_ID::int32 ClientMessage::_internal_option() const {
   return option_;
@@ -4560,7 +4527,7 @@ inline ::PROTOBUF_NAMESPACE_ID::int32 ClientMessage::option() const {
   return _internal_option();
 }
 inline void ClientMessage::_internal_set_option(::PROTOBUF_NAMESPACE_ID::int32 value) {
-  _has_bits_[0] |= 0x00000020u;
+  _has_bits_[0] |= 0x00000040u;
   option_ = value;
 }
 inline void ClientMessage::set_option(::PROTOBUF_NAMESPACE_ID::int32 value) {
@@ -4570,7 +4537,7 @@ inline void ClientMessage::set_option(::PROTOBUF_NAMESPACE_ID::int32 value) {
 
 // optional int32 userId = 2;
 inline bool ClientMessage::_internal_has_userid() const {
-  bool value = (_has_bits_[0] & 0x00000040u) != 0;
+  bool value = (_has_bits_[0] & 0x00000080u) != 0;
   return value;
 }
 inline bool ClientMessage::has_userid() const {
@@ -4578,7 +4545,7 @@ inline bool ClientMessage::has_userid() const {
 }
 inline void ClientMessage::clear_userid() {
   userid_ = 0;
-  _has_bits_[0] &= ~0x00000040u;
+  _has_bits_[0] &= ~0x00000080u;
 }
 inline ::PROTOBUF_NAMESPACE_ID::int32 ClientMessage::_internal_userid() const {
   return userid_;
@@ -4588,7 +4555,7 @@ inline ::PROTOBUF_NAMESPACE_ID::int32 ClientMessage::userid() const {
   return _internal_userid();
 }
 inline void ClientMessage::_internal_set_userid(::PROTOBUF_NAMESPACE_ID::int32 value) {
-  _has_bits_[0] |= 0x00000040u;
+  _has_bits_[0] |= 0x00000080u;
   userid_ = value;
 }
 inline void ClientMessage::set_userid(::PROTOBUF_NAMESPACE_ID::int32 value) {
@@ -4894,6 +4861,66 @@ inline void ClientMessage::set_allocated_directmessage(::chat::DirectMessageRequ
   }
   directmessage_ = directmessage;
   // @@protoc_insertion_point(field_set_allocated:chat.ClientMessage.directMessage)
+}
+
+// optional .chat.MyInfoAcknowledge acknowledge = 8;
+inline bool ClientMessage::_internal_has_acknowledge() const {
+  bool value = (_has_bits_[0] & 0x00000020u) != 0;
+  PROTOBUF_ASSUME(!value || acknowledge_ != nullptr);
+  return value;
+}
+inline bool ClientMessage::has_acknowledge() const {
+  return _internal_has_acknowledge();
+}
+inline void ClientMessage::clear_acknowledge() {
+  if (acknowledge_ != nullptr) acknowledge_->Clear();
+  _has_bits_[0] &= ~0x00000020u;
+}
+inline const ::chat::MyInfoAcknowledge& ClientMessage::_internal_acknowledge() const {
+  const ::chat::MyInfoAcknowledge* p = acknowledge_;
+  return p != nullptr ? *p : *reinterpret_cast<const ::chat::MyInfoAcknowledge*>(
+      &::chat::_MyInfoAcknowledge_default_instance_);
+}
+inline const ::chat::MyInfoAcknowledge& ClientMessage::acknowledge() const {
+  // @@protoc_insertion_point(field_get:chat.ClientMessage.acknowledge)
+  return _internal_acknowledge();
+}
+inline ::chat::MyInfoAcknowledge* ClientMessage::release_acknowledge() {
+  // @@protoc_insertion_point(field_release:chat.ClientMessage.acknowledge)
+  _has_bits_[0] &= ~0x00000020u;
+  ::chat::MyInfoAcknowledge* temp = acknowledge_;
+  acknowledge_ = nullptr;
+  return temp;
+}
+inline ::chat::MyInfoAcknowledge* ClientMessage::_internal_mutable_acknowledge() {
+  _has_bits_[0] |= 0x00000020u;
+  if (acknowledge_ == nullptr) {
+    auto* p = CreateMaybeMessage<::chat::MyInfoAcknowledge>(GetArenaNoVirtual());
+    acknowledge_ = p;
+  }
+  return acknowledge_;
+}
+inline ::chat::MyInfoAcknowledge* ClientMessage::mutable_acknowledge() {
+  // @@protoc_insertion_point(field_mutable:chat.ClientMessage.acknowledge)
+  return _internal_mutable_acknowledge();
+}
+inline void ClientMessage::set_allocated_acknowledge(::chat::MyInfoAcknowledge* acknowledge) {
+  ::PROTOBUF_NAMESPACE_ID::Arena* message_arena = GetArenaNoVirtual();
+  if (message_arena == nullptr) {
+    delete acknowledge_;
+  }
+  if (acknowledge) {
+    ::PROTOBUF_NAMESPACE_ID::Arena* submessage_arena = nullptr;
+    if (message_arena != submessage_arena) {
+      acknowledge = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
+          message_arena, acknowledge, submessage_arena);
+    }
+    _has_bits_[0] |= 0x00000020u;
+  } else {
+    _has_bits_[0] &= ~0x00000020u;
+  }
+  acknowledge_ = acknowledge;
+  // @@protoc_insertion_point(field_set_allocated:chat.ClientMessage.acknowledge)
 }
 
 // -------------------------------------------------------------------

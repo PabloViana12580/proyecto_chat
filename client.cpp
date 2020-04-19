@@ -14,10 +14,12 @@ using namespace std;
 using namespace chat;
 
 using std::cout;
+using std::endl;
+using std::string;
 using std::cin;
 #define MAX 4096
-#define PORT 8080
-#define HOSTNAME "localhost"
+#define PORT 7070
+#define HOSTNAME "192.168.1.30"
 #define SA struct sockaddr
 #define bzero(b,len) (memset((b), '\0', (len)), (void) 0)
 
@@ -56,32 +58,55 @@ int main()
     }
 
 	// Inicia el three way handshake
-
+	cout << 'Inicia el 3w handshake' << endl;
+	// MY INFO REQ
 	// Se crea instacia tipo MyInfoSynchronize y se setean los valores deseables
-    MyInfoSynchronize * miInfo(new MyInfoSynchronize);
-    miInfo->set_username("username123");
-    miInfo->set_ip("127.0.0.1");
+    MyInfoSynchronize * mySinc(new MyInfoSynchronize);
+    mySinc->set_username("oliversinn");
+    mySinc->set_ip("127.0.0.1");
 
+	// Para enviar un mensaje
     // Se crea instancia de Mensaje, se setea los valores deseados
     ClientMessage m;
-    m.set_option(0);
-    m.set_allocated_synchronize(miInfo);
+    m.set_option(1);
+    m.set_allocated_synchronize(mySinc);
+    string msg;
+    m.SerializeToString(&msg);
+	sprintf(buf,"%s",msg.c_str());
+	// Se envia el mensaje
+    send(fd , buf , sizeof(buf) , 0 );
+	cout << 'Se envio el MY INFO REQ.' << endl;
 
-    // Se serializa el message a string
-    string binary;
-    m.SerializeToString(&binary);
+	// Para recibir un mensaje
+	numbytes = recv(fd, buf, MAX, 0);
+	buf[numbytes] = '\0';
+	string data = buf;
+	// Se recibe el  MY INFO RESP.
+	MyInfoResponse s;
+	s.ParseFromString(data);
+	cout << 'Recibiendo MY INFO RESP.';
+	cout << 'Servidor:\t' << endl;
+	cout << "ID: \t" << s.userid() << endl;
 
-	// convierte a binario el mensaje
-	char cstr[binary.size() + 1];
-    strcpy(cstr, binary.c_str());
+	// Se manda el MY INFO ACK.
+	MyInfoAcknowledge * myAck(new MyInfoAcknowledge);
+	m.set_option(6);
+ 	m.set_allocated_acknowledge(myAck);
+ 	msg = "";
+	m.SerializeToString(&msg);
+	sprintf(buf,"%s",msg.c_str());
+	// Se envia el mensaje
+    send(fd , buf , sizeof(buf) , 0 );
+	cout << 'Se envio el MY INFO ACK.' << endl;
+	cout << 'Se termino el 3w handshake' << endl;
 
-
-    send(fd , cstr , strlen(cstr) , 0 );
 
 
 	// finalizacion del cliente
 	google::protobuf::ShutdownProtobufLibrary();
     return 1;
+
+	
 
 }
 
