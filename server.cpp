@@ -11,8 +11,11 @@
 #include <string>
 #include <iostream>
 
+#include "mensaje.pb.h"
+
 using std::cout;
 using std::string;
+using namespace chat;
 
 //Definimos variables globales del servidor
 #define MAX 1024
@@ -21,13 +24,67 @@ using std::string;
 #define MAXCLIENTS 20
 #define BACKLOG 10 //cuantas conexiones pendientes va a aguantar el queue
 
+
 int clientnum = 0;
 bool serverON = 1;
 
+struct ClientInformation
+{ 
+	int id;
+	int fd;
+	int status;
+	int last_connected;
+	string username;
+	ClientInformation():id(-1),fd(-1),status(-1),last_connected(1000){}
+}current_clients[MAXCLIENTS];
 
+int checkUser(int fd, string username)
+{
+	if (clientnum > MAXCLIENTS){ // si aun hay espacio
+		ErrorResponse er;
+		er.set_option(1);
+		return 1;
+	}
+
+	int i;
+	for(i=0;i<MAXCLIENTS;i++){
+		if (current_clients[i].fd != -1 &&
+			username.compare(current_clients[i].username) == 0
+		){
+			return 1;
+		}
+	}
+}
+
+//Recibe clientMessage y dependiendo de la opcion discienre que accion del server ejecutar
 int managementServer(int fd)
 {
-	
+	string buffer;
+	int code, action;
+	read(fd,buffer,sizeof(buffer));
+	cout<<"buffer: "<<buffer<<"\n";
+
+	ClientMessage msgCliente;
+    msgCliente.ParseFromString(binary);
+
+    code = msgCliente.option();
+
+    switch(code)
+    {
+    	case 1: //conecction handshake "synchronize"
+    		cout << "Se detecta opcion numero 1 synchronize\n";
+    		action = 0;
+    }
+
+    count<<"action"<<action<<"\n";
+
+    switch(action)
+    {
+    	case 0:
+    	{
+    		//Iniciando conexion 
+    	}
+    }
 }
 
 //Funcion para desplegar errores y salir del programa
@@ -59,6 +116,8 @@ void *conHandler(void *filedescriptor)
 
 int main(int argc, char* argv[])
 {
+	GOOGLE_PROTOBUF_VERIFY_VERSION;
+
 	//configuracion para el socket
 	int sockfd, len;
 	intptr_t connfd;
