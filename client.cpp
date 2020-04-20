@@ -91,7 +91,7 @@ int main(int argc, char *argv[])
 	struct hostent *he;
 	struct sockaddr_in server;
 	
-	if ((he = gethostbyname(HOSTNAME)) == NULL) {
+	if ((he = gethostbyname(argv[1])) == NULL) {
 		err("gethostbyname");
 	}
 
