@@ -8,6 +8,10 @@
 #include <stdio.h>
 #include <errno.h>
 #include <string.h> 
+#include <cstring>
+#include <cstdlib>
+#include <string>
+
 
 
 // #include <json/json.h>
@@ -276,7 +280,7 @@ int main(int argc, char *argv[])
 			scanf("%d", &intInput);
 			cout << "Ingrese el mensaje que desea enviar" << endl;
 			fflush( stdin );
-            scanf( "%c", &charInput );
+            scanf( " %c", &charInput );
 			std::string s(sizeof(charInput), charInput);
 			myMessage->set_message(s);
 			myMessage->set_username(USER);
