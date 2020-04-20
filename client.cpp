@@ -47,18 +47,22 @@ int parserFromServer(string buffer)
 		case 1: // broadcast
 			cout << "Mensaje al grupo enviado por: \t" << s.broadcast().userid() << endl;
 			cout << "Mensaje: \t" << s.broadcast().message() << endl;
+			cout << "\n" << endl;
 			return 1;
 		case 2: // directmessage
 			cout << "Mensaje Privado enviado por: \t" << s.message().userid() <<endl;
 			cout << "Mensaje: \t" << s.message().message() << endl;
+			cout << "\n" << endl;
 			return 1;
 		case 3: // error
 			cout << "Recibiendo Error" << endl;
 			cout << "ERROR: \t" << s.error().errormessage() << endl;
+			cout << "\n" << endl;
 			return 0;
 		case 4: // myInfoResponse
 			cout << "MY INFO RESPONSE RECIVIDO" << endl;
 			cout << "ID: \t" << s.myinforesponse().userid() << endl;
+			cout << "\n" << endl;
 			return 0;
 		case 5: // connectedUserResponse
 			cout << "Recibiendo connectedUserResponse" << endl;
@@ -66,19 +70,24 @@ int parserFromServer(string buffer)
 				cout << "UserID: " << s.connecteduserresponse().connectedusers(j).userid() << endl;
 				cout << "Username: " << s.connecteduserresponse().connectedusers(j).username() << endl;
 			}
+			cout << "\n" << endl;
 			return 0;
 		case 6: // changeSatatusResponse
 			cout << "Recibiendo ChangeStatusResponse: \t" << endl;
 			cout << "ID: \t" << s.changestatusresponse().userid() << endl;
 			cout << "Status: \t "<< s.changestatusresponse().status() << endl;
+			cout << "\n" << endl;
 			return 0;
 		case 7: // broadcastRespnse (sent message status)
 			cout << "Recibiendo BroadcastResponse \t" << endl;
 			cout << "Mesage Status: \t" << s.broadcastresponse().messagestatus();
+			cout << "\n" << endl;
+
 			return 0;
 		case 8: // directMessageResponse (sent message status)
 			cout << "Recibiendo DirectMessageResponse \t" << endl;
 			cout << "Mesage Status: \t" << s.directmessageresponse().messagestatus() << endl;
+			cout << "\n" << endl;
 			return 0;
 	}
 	
@@ -178,7 +187,6 @@ int main(int argc, char *argv[])
 		cout << "Escriba opción" << endl;
 		fflush( stdin );
 		scanf("%d",&opcion);
-		cout << "opcion: " << opcion << endl;
 		if (opcion == 1 ){ // connectedUserRequest
 			myUsersRequest->set_userid(0);
 			myUsersRequest->set_username(argv[2]);
@@ -189,7 +197,7 @@ int main(int argc, char *argv[])
 			sprintf(buf,"%s",msg.c_str());
 			send(fd, buf, sizeof(buf), 0);
 			cout << "Se envio el connectedUserRequest" << endl;
-			cout << "Esperando respuesta del servidor" << endl;
+			cout << "Esperando respuesta del servidor \n" << endl;
 			esResponse = 1;
 			while(esResponse == 1)
 			{
@@ -201,6 +209,7 @@ int main(int argc, char *argv[])
 				}
 				esResponse = parserFromServer(data);
 			}
+			usleep(2500000);
 			continue;
 		} else if (opcion == 2 ){ // changeStatus
 			cout << "Ingrese su nuevo estado." << endl;
@@ -215,7 +224,7 @@ int main(int argc, char *argv[])
 			sprintf(buf,"%s",msg.c_str());
 			send(fd, buf, sizeof(buf), 0);
 			cout << "Se envio el ChangeStatusRequest" << endl;
-			cout << "Esperando respuesta del servidor" << endl;
+			cout << "Esperando respuesta del servidor \n" << endl;
 			esResponse = 1;
 			while(esResponse == 1)
 			{
@@ -227,6 +236,7 @@ int main(int argc, char *argv[])
 				}
 				esResponse = parserFromServer(data);
 			}
+			usleep(2500000);
 			continue;
 		} else if (opcion == 3 ){ //broadcast
 			cout << "Ingrese el mensaje que desea enviar" << endl;
@@ -241,7 +251,7 @@ int main(int argc, char *argv[])
 			sprintf(buf,"%s",msg.c_str());
 			send(fd, buf, sizeof(buf), 0);
 			cout << "Se envio el BroadcastRequest" << endl;
-			cout << "Esperando respuesta del servidor" << endl;
+			cout << "Esperando respuesta del servidor \n" << endl;
 			esResponse = 1;
 			while(esResponse == 1)
 			{
@@ -253,6 +263,7 @@ int main(int argc, char *argv[])
 				}
 				esResponse = parserFromServer(data);
 			}
+			usleep(2500000);
 			continue;
 		} else if (opcion == 4 ){ //directmessage
 			cout << "Ingrese el mensaje que desea enviar" << endl;
@@ -268,7 +279,7 @@ int main(int argc, char *argv[])
 			sprintf(buf,"%s",msg.c_str());
 			send(fd, buf, sizeof(buf), 0);
 			cout << "Se envio el DirectMessageRequest" << endl;
-			cout << "Esperando respuesta del servidor" << endl;
+			cout << "Esperando respuesta del servidor \n" << endl;
 			esResponse = 1;
 			while(esResponse == 1)
 			{
@@ -280,6 +291,7 @@ int main(int argc, char *argv[])
 				}
 				esResponse = parserFromServer(data);
 			}
+			usleep(2500000);
 			continue;
 		} else if (opcion == 5 ){
 			cout << "HASTA LA VISTA BBY" << endl;
