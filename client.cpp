@@ -117,9 +117,8 @@ int main(int argc, char *argv[])
     mySinc->set_ip("127.0.0.1");
 	// Para enviar un mensaje
     // Se crea instancia de Mensaje, se setea los valores deseados
-	opcion = 1;
     ClientMessage m;
-    //m.set_option(opcion);
+    m.set_option(1);
     m.set_allocated_synchronize(mySinc);
 	cout << "Has option: \t" << m.has_option() << endl;
     string msg;
