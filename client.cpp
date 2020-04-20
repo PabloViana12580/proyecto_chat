@@ -7,6 +7,8 @@
 #include <cstdlib>
 #include <stdio.h>
 #include <errno.h>
+#include <string.h> 
+
 // #include <json/json.h>
 
 #include "mensaje.pb.h"
@@ -156,6 +158,10 @@ int main(int argc, char *argv[])
 	// inicializacion de instancias
 	connectedUserRequest * myUsersRequest(new connectedUserRequest);
 	ChangeStatusRequest * myChangeStatus(new ChangeStatusRequest);
+	BroadcastRequest * myBroadcast(new BroadcastRequest);
+	DirectMessageRequest * myMessage(new DirectMessageRequest);
+
+	char charInput;
 
 	int opcion;
 	while(1){
@@ -187,9 +193,8 @@ int main(int argc, char *argv[])
 			parserFromServer(data);
 		} else if (opcion == 2 ){ // changeStatus
 			cout << "Ingrese su nuevo estado." << endl;
-			char estado;
-			cin >> estado;
-			std::string s(sizeof(estado), estado);
+			cin >> charInput;
+			std::string s(sizeof(charInput), charInput);
 			myChangeStatus->set_status(s);
 			m.set_option(3);
 			m.set_allocated_changestatus(myChangeStatus);
@@ -206,37 +211,55 @@ int main(int argc, char *argv[])
 				data = buf;
 			}
 			parserFromServer(data);
-		} else if (opcion == 3 ){
-			cout << "Opcion 2" << endl;
-		} else if (opcion == 4 ){
-			cout << "Opcion 2" << endl;
+		} else if (opcion == 3 ){ //broadcast
+			cout << "Ingrese el mensaje que desea enviar" << endl;
+			cin >> charInput;
+			std::string s(sizeof(charInput), charInput);
+			myBroadcast->set_message(s);
+			m.set_option(4);
+			m.set_allocated_broadcast(myBroadcast);
+			msg = "";
+			m.SerializeToString(&msg);
+			sprintf(buf,"%s",msg.c_str());
+			send(fd, buf, sizeof(buf), 0);
+			cout << "Se envio el BroadcastRequest" << endl;
+			cout << "Esperando respuesta del servidor" << endl;
+			numbytes = -1;
+			while(numbytes==-1){
+				numbytes = recv(fd, buf, MAX_, 0);
+				buf[numbytes] = '\0';
+				data = buf;
+			}
+			parserFromServer(data);
+		} else if (opcion == 4 ){ //directmessage
+			cout << "Ingrese el mensaje que desea enviar" << endl;
+			cin >> charInput;
+			std::string s(sizeof(charInput), charInput);
+			myMessage->set_message(s);
+			myMessage->set_username(USER);
+			m.set_option(5);
+			m.set_allocated_directmessage(myMessage);
+			msg = "";
+			m.SerializeToString(&msg);
+			sprintf(buf,"%s",msg.c_str());
+			send(fd, buf, sizeof(buf), 0);
+			cout << "Se envio el DirectMessageRequest" << endl;
+			cout << "Esperando respuesta del servidor" << endl;
+			numbytes = -1;
+			while(numbytes==-1){
+				numbytes = recv(fd, buf, MAX_, 0);
+				buf[numbytes] = '\0';
+				data = buf;
+			}
+			parserFromServer(data);
 		} else if (opcion == 5 ){
+			cout << "HASTA LA VISTA BBY" << endl;
 			break;
 		} else if (opcion < 1 || opcion >5){
 			cout << "Opcion incorrecta, prueba de nuevo." << endl;
 		}
 				
 	}
-
-
-	// Inicia el envio de un mensaje
-	DirectMessageRequest * myMessage(new DirectMessageRequest);
-	myMessage->set_message("Mensaje directo de prueba");
-	myMessage->set_userid(1); // supongo que este id es generado por el server pero le voy a poner 1 hardkodeado
-	myMessage->set_username(USER); // no se si se pone el user al que le quiero enviar el mensaje o el mio
-	m.set_option(5); // option 5: directMessage
-	m.set_allocated_directmessage(myMessage);
-	msg = "";
-	m.SerializeToString(&msg);
-	sprintf(buf,"%s",msg.c_str());
-	send(fd, buf, sizeof(buf), 0);
-	cout << "Se envio el DirectMessageRequest" << endl;
-
-	numbytes = recv(fd, buf, MAX_, 0);
-	buf[numbytes] = '\0';
-	data = buf;
-	// Se parcea la respuesta esperando que sea un direct message response
-	parserFromServer(data);
 
 	// finalizacion del cliente
 	google::protobuf::ShutdownProtobufLibrary();
