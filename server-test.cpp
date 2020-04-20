@@ -247,7 +247,7 @@ int checkUser(int fd, string username)
         cout<<"it:"<<i<<"\n";
         cout<<"fd:"<<current_clients[i].fd<<"\n";
         if(current_clients[i].fd == -1){
-            current_clients[i].id = 6;
+            current_clients[i].id =i;
             current_clients[i].fd=fd;
             current_clients[i].username=username;
             current_clients[i].status = "disponible";
