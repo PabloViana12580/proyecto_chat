@@ -247,11 +247,7 @@ int checkUser(int fd, string username)
         cout<<"it:"<<i<<"\n";
         cout<<"fd:"<<current_clients[i].fd<<"\n";
         if(current_clients[i].fd == -1){
-<<<<<<< HEAD
             current_clients[i].id =i;
-=======
-            current_clients[i].id = i;
->>>>>>> 31e43f17c5f8e85e64a0621dc4d6c69880101901
             current_clients[i].fd=fd;
             current_clients[i].username=username;
             current_clients[i].status = "disponible";

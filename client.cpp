@@ -67,7 +67,7 @@ int parserFromServer(string buffer)
 			return 0;
 		case 5: // connectedUserResponse
 			cout << "Recibiendo connectedUserResponse" << endl;
-			cout << "Cantidad de usuarios:\t" << s.connecteduserresponse().connectedusers_size() << endl
+			cout << "Cantidad de usuarios:\t" << s.connecteduserresponse().connectedusers_size() << endl;
 			for (int j = 0; j < s.connecteduserresponse().connectedusers_size(); j++){
 				cout << "UserID: " << s.connecteduserresponse().connectedusers(j).userid() << endl;
 				cout << "Username: " << s.connecteduserresponse().connectedusers(j).username() << endl;
@@ -272,7 +272,7 @@ int main(int argc, char *argv[])
 			continue;
 		} else if (opcion == 4 ){ //directmessage
 			cout << "Ingrese el id del usuario al que le quiere enviar un mensaje" << endl;
-			fflosh( stdin );
+			fflush( stdin );
 			scanf("%d", &intInput);
 			cout << "Ingrese el mensaje que desea enviar" << endl;
 			fflush( stdin );
@@ -280,7 +280,7 @@ int main(int argc, char *argv[])
 			std::string s(sizeof(charInput), charInput);
 			myMessage->set_message(s);
 			myMessage->set_username(USER);
-			myMessage->set_userid(intInput)
+			myMessage->set_userid(intInput);
 			m.set_option(5);
 			m.set_allocated_directmessage(myMessage);
 			msg = "";
