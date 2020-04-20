@@ -90,7 +90,7 @@ int checkUser(int fd, string username)
         send(fd , buffer , sizeof(buffer) , 0 );
         cout << "Se envio ERROR RESPONSE" << endl;
         //er.set_option(1);
-        return 0;
+        return 500;
     }
 
     int i;
@@ -109,7 +109,7 @@ int checkUser(int fd, string username)
             sprintf(buffer,"%s",msg.c_str());
             send(fd , buffer , sizeof(buffer) , 0 );
             cout << "Se envio ERROR RESPONSE" << endl;
-            return 0;
+            return 500;
         }
     }
 
@@ -130,10 +130,9 @@ int checkUser(int fd, string username)
             cout<<"2:"<<current_clients[1].username<<"\n";
             cout<<"3:"<<current_clients[2].username<<"\n";
 
-            return 1;   
+            return i;   
         }
     }
-    return 1;
 }
 
 //Recibe clientMessage y dependiendo de la opcion discienre que accion del server ejecutar
@@ -142,42 +141,55 @@ int managementServer(int fd)
     int numbytes,action,code;
     char buf[MAXDATASIZE];
     char buffer[MAXDATASIZE];
-    numbytes = recv(fd, buf, MAXDATASIZE, 0);
-    buf[numbytes] = '\0';
-    string a = buf;
-        // cout << "Client Message: " << a << endl;
-
-        // Receive  msg from clients
-        // demo::People p;
-        // p.ParseFromString(a);
-        // cout << "People:\t" << endl;
-        // cout << "Name:\t" << p.name() << endl;
-        // cout << "ID:\t" << p.id() << endl;
-        // cout << "Email:\t" << p.email() << endl;
-
     ClientMessage c;
-    c.ParseFromString(a);
-    code = c.option();
-
-    cout<<"code: "<<code<<"\n";
-
+    numbytes = recv(fd, buf, MAXDATASIZE, MSG_WAITALL);
+    if(numbytes!=0  && numbytes!=-1){    
+        buf[numbytes] = '\0';
+        string a = buf;
+                // cout << "Client Message: " << a << endl;
+        
+                // Receive  msg from clients
+                // demo::People p;
+                // p.ParseFromString(a);
+                // cout << "People:\t" << endl;
+                // cout << "Name:\t" << p.name() << endl;
+                // cout << "ID:\t" << p.id() << endl;
+                // cout << "Email:\t" << p.email() << endl;
+        
+        c.ParseFromString(a);
+        code = c.option();
+        
+        cout<<"code: "<<code<<"\n";
+        
+    }
     switch(code)
     {
-        case 1: //conecction handshake "synchronize"
+        case 1:
+        { //conecction handshake "synchronize"
             cout << "Se detecta opcion numero 1 synchronize\n";
-            action = 0;
+            action = 1;
+        }
+        break;
+        case 6:
+        {
+            cout << "Usuario conectado listo para chatear\n";
+            code = 0;
+
+        }
+        break;
     }
 
-    cout<<"action: "<<action<<"\n";
-
+    if(numbytes!=0  && numbytes!=-1){
+        cout<<"action: "<<action<<"\n";
+    }
     switch(action)
     {
-        case 0:
+        case 1:
         {
             int resp = checkUser(fd,c.synchronize().username());
-            if(resp != 0){
+            if(resp != 500){
                 MyInfoResponse * MyInfo(new MyInfoResponse);
-                MyInfo -> set_userid(fd);
+                MyInfo -> set_userid(resp);
 
                 ServerMessage sm;
                 sm.set_option(4);
@@ -187,7 +199,10 @@ int managementServer(int fd)
                 sprintf(buffer,"%s",msg.c_str());
                 send(fd , buffer , sizeof(buffer) , 0 );
                 cout << "Se envio el MY INFO RESPONSE" << endl;
-            }
+                action = 0;
+                return 0;
+        }
+        break;
             //Iniciando conexion
                     // // Send msg to clients
         // string data;
