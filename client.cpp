@@ -58,7 +58,8 @@ int parserFromServer(string buffer)
 			cout << "Recibiendo Error" << endl;
 			cout << "ERROR: \t" << s.error().errormessage() << endl;
 			cout << "\n" << endl;
-			return 0;
+			cout << "cerrando cliente\n"<<endl;
+			return 500;
 		case 4: // myInfoResponse
 			cout << "MY INFO RESPONSE RECIVIDO" << endl;
 			cout << "ID: \t" << s.myinforesponse().userid() << endl;
@@ -98,7 +99,7 @@ int parserFromServer(string buffer)
 int main(int argc, char *argv[])
 {
 	int fd;
-	int numbytes;
+	int numbytes,finalizacion;
 	char buf[MAX_];
 	struct hostent *he;
 	struct sockaddr_in server;
@@ -152,20 +153,23 @@ int main(int argc, char *argv[])
 	}
 	
 	// Se parcea la respuesta esperando que sea el MyInfoResponse
-	parserFromServer(data);
-
-	// Se manda el MY INFO ACK.
-	MyInfoAcknowledge * myAck(new MyInfoAcknowledge);
-	m.set_option(6);
- 	m.set_allocated_acknowledge(myAck);
- 	msg = "";
-	m.SerializeToString(&msg);
-	sprintf(buf,"%s",msg.c_str());
-	// Se envia el mensaje
-    send(fd , buf , sizeof(buf) , 0 );
-	cout << "Se envio el MY INFO ACK." << endl;
-	cout << "TERMINA THREE WAY HANDSHAKE.\n" << endl;
-	// Finaliza el 3w handshake
+	if(parserFromServer(data) != 500)
+	{
+		// Se manda el MY INFO ACK.
+		MyInfoAcknowledge * myAck(new MyInfoAcknowledge);
+		m.set_option(6);
+	 	m.set_allocated_acknowledge(myAck);
+	 	msg = "";
+		m.SerializeToString(&msg);
+		sprintf(buf,"%s",msg.c_str());
+		// Se envia el mensaje
+	    send(fd , buf , sizeof(buf) , 0 );
+		cout << "Se envio el MY INFO ACK." << endl;
+		cout << "TERMINA THREE WAY HANDSHAKE.\n" << endl;
+	}else{
+		finalizacion = 100;
+	}
+	// Finaliza el 3w handshake}
 
 
 	// inicializacion de instancias
@@ -178,7 +182,7 @@ int main(int argc, char *argv[])
 	int intInput;
 	int opcion;
 	int esResponse;
-	while(1){
+	while(1 && finalizacion!=100){
 		cout << "\nQue quieres hacer?" << endl;
 		cout << "(1) Obtener usuarios conectados" << endl;
 		cout << "(2) Cambiar estado de conexion" << endl;
