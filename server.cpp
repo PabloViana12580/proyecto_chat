@@ -15,10 +15,11 @@
 
 using std::cout;
 using std::string;
+using std::endl;
 using namespace chat;
 
 //Definimos variables globales del servidor
-#define MAX_ 1024
+#define MAX_ 16384
 #define PORT 7070
 #define SA struct sockaddr
 #define MAX_CLIENTS 20
@@ -100,6 +101,7 @@ static void error(const char* s)
 //funcion que ejecutara cada thread, recibe el file descriptor que regresa accept()
 void *conHandler(void *filedescriptor)
 {
+	//cout << 'aca toy' << endl;
 	//Parseamos el parametro de void a long para usar el file descriptor
 	long connectfd = (long) filedescriptor;
 
@@ -126,6 +128,7 @@ int main(int argc, char* argv[])
 	intptr_t connfd;
 	struct sockaddr_in server, client;
 	socklen_t sin_size;
+	char buf[MAX_];
 
 	/*
 	socket()
@@ -145,6 +148,12 @@ int main(int argc, char* argv[])
     server.sin_port = htons(PORT);
     server.sin_addr.s_addr = htonl(INADDR_ANY); // automatically fill with my IP
 
+
+
+	int opt = SO_REUSEADDR;
+    if (setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)) == -1) {
+        error("setsockopt");
+    }
     /*
 	bind()
 
@@ -190,6 +199,17 @@ int main(int argc, char* argv[])
     	}
 
     	cout << "Server detected new connection\n";
+
+		len = recv(connfd, buf, MAX_, MSG_WAITALL);
+        // buf[len] = '\0';
+        string a = buf;
+        cout << "You got a message from " << inet_ntoa(client.sin_addr) << endl;
+		cout << "a: \t" << a << endl;
+
+		ClientMessage c;
+		c.ParseFromString(a);
+		cout << "Opcion: \t" << c.option() << endl;
+		cout << "Username: \t" << c.synchronize().username() << endl; 
 
     	//Utilizamos un thread para manejar cada una de las conexiones al socket
     	pthread_t conection_thread;

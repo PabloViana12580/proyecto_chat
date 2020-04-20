@@ -16,15 +16,17 @@ using std::cout;
 using std::endl;
 using std::string;
 using std::cin;
-#define MAX_ 4096
+#define MAX_ 16384
 #define PORT 7070
-#define HOSTNAME "192.168.1.30"
+#define HOSTNAME "192.168.1.6"
 #define SA struct sockaddr
 #define bzero(b,len) (memset((b), '\0', (len)), (void) 0)
 #define USER "oliversinn"
 
+
 int connected;
 int code;
+int32_t opcion;
 
 // Funcion para errores
 static void err(const char* s) {
@@ -88,8 +90,6 @@ int main(int argc, char *argv[])
 	char buf[MAX_];
 	struct hostent *he;
 	struct sockaddr_in server;
-
-	cout << "quepedo";
 	
 	if ((he = gethostbyname(HOSTNAME)) == NULL) {
 		err("gethostbyname");
@@ -117,15 +117,20 @@ int main(int argc, char *argv[])
     mySinc->set_ip("127.0.0.1");
 	// Para enviar un mensaje
     // Se crea instancia de Mensaje, se setea los valores deseados
+	opcion = 1;
     ClientMessage m;
-    m.set_option(1);
+    //m.set_option(opcion);
     m.set_allocated_synchronize(mySinc);
+	cout << "Has option: \t" << m.has_option() << endl;
     string msg;
-    m.SerializeToString(&msg);
-	sprintf(buf,"%s",msg.c_str());
-	// Se envia el mensaje
-    send(fd , buf , sizeof(buf) , 0 );
-	cout << "'Se envio el MY INFO REQ.'" << endl;
+	if(m.has_option()){
+		m.SerializeToString(&msg);
+		sprintf(buf,"%s",msg.c_str());
+		// Se envia el mensaje
+		send(fd , buf , sizeof(buf) , 0 );
+		cout << "Se envio el MY INFO REQ." << endl;
+	}
+    
 
 	// Para recibir un mensaje
 	numbytes = recv(fd, buf, MAX_, 0);
