@@ -55,11 +55,37 @@ struct ClientInformation
 { 
     int id;
     int fd;
-    int status; //0 activo, 1 ocupado, 2 desconectado
-    int last_connected;
+    string status; //0 activo, 1 ocupado, 2 desconectado
+    string ip;
     string username;
-    ClientInformation():id(-1),fd(-1),status(-1),last_connected(1000){}
+    ClientInformation():id(-1),fd(-1),status("disponible"),ip("localhost"){}
 }current_clients[MAX_CLIENTS];
+
+void getUsers(int fd){
+    char buffer[MAXDATASIZE];
+    ConnectedUserResponse * cur(new ConnectedUserResponse);
+
+    for(int i=0;i<MAXCLIENTS;i++){
+        //cout << "fd: " << current_clients[i].fd <<"\n";
+        if (current_clients[i].fd != -1 && current_clients[i].fd != fd){
+            ConnectedUserResponse::ConnectedUser* conuser = cur->add_connectedusers();
+            conuser->set_username(current_clients[i].username);
+            conuser->set_status(current_clients[i].status);
+            conuser->set_userid(current_clients[i].id);
+        }
+    }
+    
+//  cout << json_object_to_json_string(jdata);
+    ServerMessage sm;
+    sm.set_option(2);
+    sm.set_allocated_connecteduserresponse(cur);
+    string msg;
+    sm.SerializeToString(&msg);
+    sprintf(buffer,"%s",msg.c_str());
+    send(fd , buffer , sizeof(buffer) , 0 );
+    cout << "Se envio GET USERS" << endl;
+}
+
 
 int checkUser(int fd, string username)
 {
@@ -120,8 +146,8 @@ int checkUser(int fd, string username)
             current_clients[i].id = i;
             current_clients[i].fd=fd;
             current_clients[i].username=username;
-            current_clients[i].status = 0;
-            current_clients[i].last_connected = 0;
+            current_clients[i].status = "disponible";
+            current_clients[i].ip = "localhost";
             
             //char userInfo[MAX];
             //strcpy(userInfo,json_object_to_json_string(jobj));
@@ -170,6 +196,12 @@ int managementServer(int fd)
             action = 1;
         }
         break;
+        case 2:
+        {
+            cout << "Se detecta opcion numero 2 connectedUsers\n";
+            action = 2;
+        }
+        break;
         case 6:
         {
             cout << "Usuario conectado listo para chatear\n";
@@ -203,8 +235,14 @@ int managementServer(int fd)
                 return 0;
         }
         break;
-            //Iniciando conexion
-                    // // Send msg to clients
+        case 2:
+        {
+            //aqui podria haber clavo porque no se si es connectedusers()
+            if(c.connectedusers().userid() == 0)
+            {
+                getUsers();
+            }
+        }
         // string data;
         // demo::People to;
         // to.set_name("Lysting Huang");
