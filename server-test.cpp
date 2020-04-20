@@ -65,13 +65,14 @@ void getUsers(int fd){
     char buffer[MAXDATASIZE];
     ConnectedUserResponse * cur(new ConnectedUserResponse);
 
-    for(int i=0;i<MAXCLIENTS;i++){
+    for(int i=0;i<MAX_CLIENTS;i++){
         //cout << "fd: " << current_clients[i].fd <<"\n";
         if (current_clients[i].fd != -1 && current_clients[i].fd != fd){
-            ConnectedUserResponse::ConnectedUser* conuser = cur->add_connectedusers();
+            ConnectedUser * conuser(new ConnectedUser);
             conuser->set_username(current_clients[i].username);
             conuser->set_status(current_clients[i].status);
             conuser->set_userid(current_clients[i].id);
+            conuser =cur->add_connectedusers();
         }
     }
     
@@ -164,7 +165,7 @@ int checkUser(int fd, string username)
 //Recibe clientMessage y dependiendo de la opcion discienre que accion del server ejecutar
 int managementServer(int fd)
 {
-    int numbytes,action,code;
+    int numbytes,action,code,resp;
     char buf[MAXDATASIZE];
     char buffer[MAXDATASIZE];
     ClientMessage c;
@@ -218,7 +219,7 @@ int managementServer(int fd)
     {
         case 1:
         {
-            int resp = checkUser(fd,c.synchronize().username());
+            resp = checkUser(fd,c.synchronize().username());
             if(resp != 500){
                 MyInfoResponse * MyInfo(new MyInfoResponse);
                 MyInfo -> set_userid(resp);
@@ -240,7 +241,7 @@ int managementServer(int fd)
             //aqui podria haber clavo porque no se si es connectedusers()
             if(c.connectedusers().userid() == 0)
             {
-                getUsers();
+                getUsers(fd);
             }
         }
         // string data;
