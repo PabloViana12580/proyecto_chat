@@ -171,7 +171,9 @@ int main(int argc, char *argv[])
 		cout << "(3) Transmitir un mensaje a todos los usuarios" << endl;
 		cout << "(4) Enviar un mensaje directo" << endl;
 		cout << "(5) Salir\t" << endl;
-		cin >> opcion;
+		cout << "Escriba opción" << endl;
+		fflush( stdin );
+		scanf("%d",&opcion);
 		cout << "opcion: " << opcion << endl;
 		if (opcion == 1 ){ // connectedUserRequest
 			myUsersRequest->set_userid(0);
@@ -191,9 +193,11 @@ int main(int argc, char *argv[])
 				data = buf;
 			}
 			parserFromServer(data);
+			continue;
 		} else if (opcion == 2 ){ // changeStatus
 			cout << "Ingrese su nuevo estado." << endl;
-			cin >> charInput;
+			fflush( stdin );
+            scanf( "%c", &charInput );
 			std::string s(sizeof(charInput), charInput);
 			myChangeStatus->set_status(s);
 			m.set_option(3);
@@ -211,10 +215,11 @@ int main(int argc, char *argv[])
 				data = buf;
 			}
 			parserFromServer(data);
-			opcion = 0;
+			continue;
 		} else if (opcion == 3 ){ //broadcast
 			cout << "Ingrese el mensaje que desea enviar" << endl;
-			cin >> charInput;
+			fflush( stdin );
+            scanf( "%c", &charInput );
 			std::string s(sizeof(charInput), charInput);
 			myBroadcast->set_message(s);
 			m.set_option(4);
@@ -232,9 +237,11 @@ int main(int argc, char *argv[])
 				data = buf;
 			}
 			parserFromServer(data);
+			continue;
 		} else if (opcion == 4 ){ //directmessage
 			cout << "Ingrese el mensaje que desea enviar" << endl;
-			cin >> charInput;
+			fflush( stdin );
+            scanf( "%c", &charInput );
 			std::string s(sizeof(charInput), charInput);
 			myMessage->set_message(s);
 			myMessage->set_username(USER);
@@ -253,13 +260,13 @@ int main(int argc, char *argv[])
 				data = buf;
 			}
 			parserFromServer(data);
+			continue;
 		} else if (opcion == 5 ){
 			cout << "HASTA LA VISTA BBY" << endl;
 			break;
-		}else if (opcion == 0) {
-
 		} else if (opcion < 0 || opcion >5){
 			cout << "Opcion incorrecta, prueba de nuevo." << endl;
+			continue;
 		}
 				
 	}

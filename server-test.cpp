@@ -77,7 +77,7 @@ void getUsers(int fd){
     }
 
     ServerMessage sm;
-    sm.set_option(6);
+    sm.set_option(5);
     sm.set_allocated_connecteduserresponse(cur);
     if(sm.has_option()){
         string msg;
@@ -170,7 +170,7 @@ void changeStatus(int fd, string status){
             MyResp -> set_status(current_clients[i].status);
             
             ServerMessage sm;
-            sm.set_option(5);
+            sm.set_option(6);
             sm.set_allocated_changestatusresponse(MyResp);
             if(sm.has_option()){
                 string msg;
