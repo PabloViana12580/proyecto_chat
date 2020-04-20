@@ -112,7 +112,7 @@ int main(int argc, char *argv[])
 	// MY INFO REQ
 	// Se crea instacia tipo MyInfoSynchronize y se setean los valores deseables
     MyInfoSynchronize * mySinc(new MyInfoSynchronize);
-    mySinc->set_username(USER);
+    mySinc->set_username(argv[2]);
     mySinc->set_ip("127.0.0.1");
 	// Para enviar un mensaje
     // Se crea instancia de Mensaje, se setea los valores deseados
@@ -175,7 +175,7 @@ int main(int argc, char *argv[])
 		cout << "opcion: " << opcion << endl;
 		if (opcion == 1 ){ // connectedUserRequest
 			myUsersRequest->set_userid(0);
-			myUsersRequest->set_username(USER);
+			myUsersRequest->set_username(argv[2]);
 			m.set_option(2);
 			m.set_allocated_connectedusers(myUsersRequest);
 			msg = "";
@@ -185,7 +185,7 @@ int main(int argc, char *argv[])
 			cout << "Se envio el connectedUserRequest" << endl;
 			cout << "Esperando respuesta del servidor" << endl;
 			numbytes = -1;
-			while(numbytes==-1){
+			if(numbytes==-1){
 				numbytes = recv(fd, buf, MAX_, 0);
 				buf[numbytes] = '\0';
 				data = buf;
