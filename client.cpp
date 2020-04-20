@@ -211,6 +211,7 @@ int main(int argc, char *argv[])
 				data = buf;
 			}
 			parserFromServer(data);
+			opcion = 0;
 		} else if (opcion == 3 ){ //broadcast
 			cout << "Ingrese el mensaje que desea enviar" << endl;
 			cin >> charInput;
@@ -255,7 +256,9 @@ int main(int argc, char *argv[])
 		} else if (opcion == 5 ){
 			cout << "HASTA LA VISTA BBY" << endl;
 			break;
-		} else if (opcion < 1 || opcion >5){
+		}else if (opcion == 0) {
+
+		} else if (opcion < 0 || opcion >5){
 			cout << "Opcion incorrecta, prueba de nuevo." << endl;
 		}
 				

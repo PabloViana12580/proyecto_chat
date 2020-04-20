@@ -64,27 +64,55 @@ struct ClientInformation
 void getUsers(int fd){
     char buffer[MAXDATASIZE];
     ConnectedUserResponse * cur(new ConnectedUserResponse);
+    ConnectedUser * conuser(new ConnectedUser);
+    conuser = cur->add_connectedusers();
 
     for(int i=0;i<MAX_CLIENTS;i++){
         //cout << "fd: " << current_clients[i].fd <<"\n";
         if (current_clients[i].fd != -1 && current_clients[i].fd != fd){
-            ConnectedUser * conuser(new ConnectedUser);
             conuser->set_username(current_clients[i].username);
             conuser->set_status(current_clients[i].status);
             conuser->set_userid(current_clients[i].id);
-            conuser =cur->add_connectedusers();
         }
     }
-    
-//  cout << json_object_to_json_string(jdata);
+
     ServerMessage sm;
-    sm.set_option(2);
+    sm.set_option(5);
     sm.set_allocated_connecteduserresponse(cur);
-    string msg;
-    sm.SerializeToString(&msg);
-    sprintf(buffer,"%s",msg.c_str());
-    send(fd , buffer , sizeof(buffer) , 0 );
-    cout << "Se envio GET USERS" << endl;
+    if(sm.has_option()){
+        string msg;
+        sm.SerializeToString(&msg);
+        sprintf(buffer,"%s",msg.c_str());
+        send(fd, buffer, sizeof(buffer), 0);
+        cout << "Se envio GET USERS" << endl;}
+}
+
+void changeStatus(int fd, string status){
+    int i;
+    char buffer[MAXDATASIZE];
+    for(i=0;i<MAX_CLIENTS;i++){
+        if(fd == current_clients[i].fd)
+        {
+            current_clients[i].status=status;
+            ChangeStatusResponse * MyResp(new ChangeStatusResponse);
+            MyResp -> set_userid(current_clients[i].id);
+            MyResp -> set_status(current_clients[i].status);
+            
+            ServerMessage sm;
+            sm.set_option(5);
+            sm.set_allocated_changestatusresponse(MyResp);
+            if(sm.has_option()){
+                string msg;
+                sm.SerializeToString(&msg);
+                sprintf(buffer,"%s",msg.c_str());
+                send(fd, buffer, sizeof(buffer), 0);
+                cout << "Se envio CHANGE STATUS" << endl;} 
+            
+            return; 
+        }
+    }
+
+    return;
 }
 
 
@@ -203,6 +231,12 @@ int managementServer(int fd)
             action = 2;
         }
         break;
+        case 3:
+        {
+            cout << "Se detecta opcion numero 3 changeStatus\n";
+            action = 3;
+        }
+        break;
         case 6:
         {
             cout << "Usuario conectado listo para chatear\n";
@@ -244,6 +278,11 @@ int managementServer(int fd)
                 getUsers(fd);
             }
         }
+        break;
+        case 3: 
+        {
+            changeStatus(fd, c.changestatus().status());
+        }
         // string data;
         // demo::People to;
         // to.set_name("Lysting Huang");
@@ -274,8 +313,8 @@ void *conHandler(void *filedescriptor)
         if(connectfd<0 || managementServer(connectfd) == 1)
         {
             clientnum = clientnum - 1;
-            close(connectfd);
-            serverON = 0;
+            //close(connectfd);
+            //serverON = 0;
             pthread_exit(0);
         }
     }
@@ -352,6 +391,7 @@ int main(int argc, char** argv) {
     }
 
     close(listenfd);
+    //close(connectfd);
 
     return 0;
 }
