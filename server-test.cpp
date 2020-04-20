@@ -77,7 +77,7 @@ void getUsers(int fd){
     }
 
     ServerMessage sm;
-    sm.set_option(5);
+    sm.set_option(6);
     sm.set_allocated_connecteduserresponse(cur);
     if(sm.has_option()){
         string msg;
@@ -85,6 +85,77 @@ void getUsers(int fd){
         sprintf(buffer,"%s",msg.c_str());
         send(fd, buffer, sizeof(buffer), 0);
         cout << "Se envio GET USERS" << endl;}
+}
+
+void messageToSomeone(int fd, string mensaje,int userid){
+    char buffer[MAXDATASIZE];
+    DirectMessageResponse * DirMes(new DirectMessageResponse);
+    DirMes -> set_messagestatus("Mensaje recibido");
+
+    ServerMessage sm;
+    sm.set_option(8);
+    sm.set_allocated_directmessageresponse(DirMes);
+    if(sm.has_option()){
+        string msg;
+        sm.SerializeToString(&msg);
+        sprintf(buffer,"%s",msg.c_str());
+        send(fd, buffer, sizeof(buffer), 0);
+        cout << "Se envio Direct message response" << endl;}
+
+    for(int i=0;i<MAX_CLIENTS;i++){
+        if(current_clients[i].id == userid){ // no esta asignado
+            DirectMessage * DM(new DirectMessage);
+            DM -> set_message(mensaje);
+            DM -> set_userid(current_clients[i].id);
+
+            sm.set_option(2);
+            sm.set_allocated_message(DM);
+            if(sm.has_option()){
+                string msg;
+                sm.SerializeToString(&msg);
+                sprintf(buffer,"%s",msg.c_str());
+                send(current_clients[i].fd, buffer, sizeof(buffer), 0);
+                cout << "Se envio Direct message" << endl;}
+            return;
+        }
+    }
+
+    return;
+}
+
+void messageToAll(int fd, string mensaje){
+    char buffer[MAXDATASIZE];
+    BroadcastResponse * brodmsgr(new BroadcastResponse);
+    brodmsgr -> set_messagestatus("Mensaje recibido");
+    ServerMessage sm;
+    sm.set_option(7);
+    sm.set_allocated_broadcastresponse(brodmsgr);
+    if(sm.has_option()){
+        string msg;
+        sm.SerializeToString(&msg);
+        sprintf(buffer,"%s",msg.c_str());
+        send(fd, buffer, sizeof(buffer), 0);
+        cout << "Se envio Broadcast response" << endl;}
+
+    for(int i=0;i<MAX_CLIENTS;i++){
+        if(current_clients[i].fd == fd){ // si es la persona que lo envio
+            //serverResponse(current_clients[i].fd,"mensaje enviado",205);
+        }else if(current_clients[i].fd != -1){ // si no esta asignado
+            BroadcastMessage * brodmsg(new BroadcastMessage);
+            brodmsg -> set_message(mensaje);
+            brodmsg -> set_userid(current_clients[i].id);
+            brodmsg -> set_username(current_clients[i].username);
+            sm.set_option(1);
+            sm.set_allocated_broadcast(brodmsg);
+            if(sm.has_option()){
+                string msg;
+                sm.SerializeToString(&msg);
+                sprintf(buffer,"%s",msg.c_str());
+                send(current_clients[i].fd, buffer, sizeof(buffer), 0);
+                cout << "Se envio Broadcast Message" << endl;}    
+
+        }
+    }
 }
 
 void changeStatus(int fd, string status){
@@ -237,6 +308,17 @@ int managementServer(int fd)
             action = 3;
         }
         break;
+        case 4:
+        {
+            cout << "Se detecta opcion numero 4 Broadcast\n";
+            action = 4;
+        }
+        break;
+        case 5:
+        {
+           cout << "Se detecta opcion numero 5 Direct Message\n";
+           action = 5;
+        }
         case 6:
         {
             cout << "Usuario conectado listo para chatear\n";
@@ -283,6 +365,19 @@ int managementServer(int fd)
         {
             changeStatus(fd, c.changestatus().status());
         }
+        break;
+        case 4:
+        {
+            messageToAll(fd, c.broadcast().message());
+        }
+        break;
+        case 5:
+        {
+            messageToSomeone(fd, c.directmessage().message(), c.directmessage().userid());
+        }
+        break;
+        default:
+            break;
         // string data;
         // demo::People to;
         // to.set_name("Lysting Huang");
