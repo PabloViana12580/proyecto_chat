@@ -57,7 +57,10 @@ void parserFromServer(string buffer)
 			cout << "ID: \t" << s.myinforesponse().userid() << endl;
 			break;
 		case 5: // connectedUserResponse
-
+			cout << "Recibiendo connectedUserResponse" << endl;
+			for (int j = 0; j < s.connecteduserresponse().connectedusers_size(); j++){
+				cout << "Usuario: " << s.connecteduserresponse().connectedusers(j).username() << endl;
+			}
 			break;
 		case 6: // changeSatatusResponse
 			cout << "Recibiendo ChangeStatusResponse: \t" << endl;
@@ -152,6 +155,7 @@ int main(int argc, char *argv[])
 
 	// inicializacion de instancias
 	connectedUserRequest * myUsersRequest(new connectedUserRequest);
+	ChangeStatusRequest * myChangeStatus(new ChangeStatusRequest);
 
 	int opcion;
 	while(1){
@@ -181,8 +185,27 @@ int main(int argc, char *argv[])
 				data = buf;
 			}
 			parserFromServer(data);
-		} else if (opcion == 2 ){
-			cout << "Opcion 2" << endl;
+		} else if (opcion == 2 ){ // changeStatus
+			cout << "Ingrese su nuevo estado." << endl;
+			char estado;
+			cin >> estado;
+			std::string s(sizeof(estado), estado);
+			myChangeStatus->set_status(s);
+			m.set_option(3);
+			m.set_allocated_changestatus(myChangeStatus);
+			msg = "";
+			m.SerializeToString(&msg);
+			sprintf(buf,"%s",msg.c_str());
+			send(fd, buf, sizeof(buf), 0);
+			cout << "Se envio el ChangeStatusRequest" << endl;
+			cout << "Esperando respuesta del servidor" << endl;
+			numbytes = -1;
+			while(numbytes==-1){
+				numbytes = recv(fd, buf, MAX_, 0);
+				buf[numbytes] = '\0';
+				data = buf;
+			}
+			parserFromServer(data);
 		} else if (opcion == 3 ){
 			cout << "Opcion 2" << endl;
 		} else if (opcion == 4 ){
