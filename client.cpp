@@ -16,6 +16,7 @@ using std::cout;
 using std::endl;
 using std::string;
 using std::cin;
+using namespace std;
 #define MAX_ 16384
 #define PORT 7070
 #define HOSTNAME "192.168.1.6"
@@ -40,42 +41,35 @@ void parserFromServer(string buffer)
 	s.ParseFromString(buffer);
 	switch(s.option()){
 		case 1: // broadcast
-			cout << "'Mensaje al Grupo: \t'" << endl;
-			cout << "'Enviado por: \t'" << s.broadcast().userid() << endl;
-			cout << "'Mensaje: \t'" << s.broadcast().message() << endl;
+			cout << "Mensaje al grupo enviado por: \t" << s.broadcast().userid() << endl;
+			cout << "Mensaje: \t" << s.broadcast().message() << endl;
 			break;
 		case 2: // directmessage
-			cout << "'Mensaje Privado: \t'" << endl;
-			cout << "'Enviado por: \t'" << s.message().userid() <<endl;
-			cout << "'Mensaje: \t'" << s.message().message() << endl;
+			cout << "Mensaje Privado enviado por: \t" << s.message().userid() <<endl;
+			cout << "Mensaje: \t" << s.message().message() << endl;
 			break;
 		case 3: // error
-			cout << "'Recibiendo Error'" << endl;
-			cout << "'Servidor:\t'" << endl;
-			cout << "'ERROR: \t'" << s.error().errormessage() << endl;
+			cout << "Recibiendo Error" << endl;
+			cout << "ERROR: \t" << s.error().errormessage() << endl;
 			break;
 		case 4: // myInfoResponse
-			cout << "'Recibiendo MY INFO RESP.'" << endl;
-			cout << "'Servidor:\t'" << endl;
+			cout << "MY INFO RESPONSE RECIVIDO" << endl;
 			cout << "ID: \t" << s.myinforesponse().userid() << endl;
 			break;
 		case 5: // connectedUserResponse
 
 			break;
 		case 6: // changeSatatusResponse
-			cout << "'Recibiendo ChangeStatusResponse: \t'" << endl;
-			cout << "'Servidor: \t'" << endl;
-			cout << "'ID: \t'" << s.changestatusresponse().userid() << endl;
-			cout << "'Status: \t' "<< s.changestatusresponse().status() << endl;
+			cout << "Recibiendo ChangeStatusResponse: \t" << endl;
+			cout << "ID: \t" << s.changestatusresponse().userid() << endl;
+			cout << "Status: \t "<< s.changestatusresponse().status() << endl;
 			break;
 		case 7: // broadcastRespnse (sent message status)
-			cout << "'Recibiendo BroadcastResponse \t'" << endl;
-			cout << "'Servidor: \t'" << endl;
-			cout << "'Mesage Status: \t'" << s.broadcastresponse().messagestatus();
+			cout << "Recibiendo BroadcastResponse \t" << endl;
+			cout << "Mesage Status: \t" << s.broadcastresponse().messagestatus();
 			break;
 		case 8: // directMessageResponse (sent message status)
-			cout << "'Recibiendo DirectMessageResponse \t'" << endl;
-			cout << "'Servidor:\t'" << endl;
+			cout << "Recibiendo DirectMessageResponse \t" << endl;
 			cout << "Mesage Status: \t" << s.directmessageresponse().messagestatus() << endl;
 			break;
 	}
@@ -109,7 +103,7 @@ int main(int argc, char *argv[])
     }
     
 	// Inicia el three way handshake
-	cout << "'Inicia el 3w handshake'" << endl;
+	cout << "\nINICIA THREE WAY HANDSHAKE" << endl;
 	// MY INFO REQ
 	// Se crea instacia tipo MyInfoSynchronize y se setean los valores deseables
     MyInfoSynchronize * mySinc(new MyInfoSynchronize);
@@ -120,7 +114,6 @@ int main(int argc, char *argv[])
     ClientMessage m;
     m.set_option(1);
     m.set_allocated_synchronize(mySinc);
-	cout << "Has option: \t" << m.has_option() << endl;
     string msg;
 	if(m.has_option()){
 		m.SerializeToString(&msg);
@@ -130,11 +123,16 @@ int main(int argc, char *argv[])
 		cout << "Se envio el MY INFO REQ." << endl;
 	}
     
-
+	string data;
+	numbytes = -1;
 	// Para recibir un mensaje
-	numbytes = recv(fd, buf, MAX_, 0);
-	buf[numbytes] = '\0';
-	string data = buf;
+	cout << "Esperando MY INFO RESPONSE DEL SERVIDOR" << endl;
+	while(numbytes==-1){
+		numbytes = recv(fd, buf, MAX_, 0);
+		buf[numbytes] = '\0';
+		data = buf;
+	}
+	
 	// Se parcea la respuesta esperando que sea el MyInfoResponse
 	parserFromServer(data);
 
@@ -147,9 +145,55 @@ int main(int argc, char *argv[])
 	sprintf(buf,"%s",msg.c_str());
 	// Se envia el mensaje
     send(fd , buf , sizeof(buf) , 0 );
-	cout << "'Se envio el MY INFO ACK.'" << endl;
-	cout << "'Se termino el 3w handshake'" << endl;
+	cout << "Se envio el MY INFO ACK." << endl;
+	cout << "TERMINA THREE WAY HANDSHAKE.\n" << endl;
 	// Finaliza el 3w handshake
+
+
+	// inicializacion de instancias
+	connectedUserRequest * myUsersRequest(new connectedUserRequest);
+
+	int opcion;
+	while(1){
+		cout << "\nQue quieres hacer?" << endl;
+		cout << "(1) Obtener usuarios conectados" << endl;
+		cout << "(2) Cambiar estado de conexion" << endl;
+		cout << "(3) Transmitir un mensaje a todos los usuarios" << endl;
+		cout << "(4) Enviar un mensaje directo" << endl;
+		cout << "(5) Salir\t" << endl;
+		cin >> opcion;
+		cout << "opcion: " << opcion << endl;
+		if (opcion == 1 ){ // connectedUserRequest
+			myUsersRequest->set_userid(0);
+			myUsersRequest->set_username(USER);
+			m.set_option(2);
+			m.set_allocated_connectedusers(myUsersRequest);
+			msg = "";
+			m.SerializeToString(&msg);
+			sprintf(buf,"%s",msg.c_str());
+			send(fd, buf, sizeof(buf), 0);
+			cout << "Se envio el connectedUserRequest" << endl;
+			cout << "Esperando respuesta del servidor" << endl;
+			numbytes = -1;
+			while(numbytes==-1){
+				numbytes = recv(fd, buf, MAX_, 0);
+				buf[numbytes] = '\0';
+				data = buf;
+			}
+			parserFromServer(data);
+		} else if (opcion == 2 ){
+			cout << "Opcion 2" << endl;
+		} else if (opcion == 3 ){
+			cout << "Opcion 2" << endl;
+		} else if (opcion == 4 ){
+			cout << "Opcion 2" << endl;
+		} else if (opcion == 5 ){
+			break;
+		} else if (opcion < 1 || opcion >5){
+			cout << "Opcion incorrecta, prueba de nuevo." << endl;
+		}
+				
+	}
 
 
 	// Inicia el envio de un mensaje
@@ -163,7 +207,7 @@ int main(int argc, char *argv[])
 	m.SerializeToString(&msg);
 	sprintf(buf,"%s",msg.c_str());
 	send(fd, buf, sizeof(buf), 0);
-	cout << "'Se envio el DirectMessageRequest'" << endl;
+	cout << "Se envio el DirectMessageRequest" << endl;
 
 	numbytes = recv(fd, buf, MAX_, 0);
 	buf[numbytes] = '\0';
@@ -184,7 +228,7 @@ int main(int argc, char *argv[])
 // void clientResponse(int fd, int code){
 // 	char buff[MAX];
 // 	int n = 0;
-// 	while((buff[n++] = getchar()) != '\n');
+// 	while((buff[n++] = getchar()) != "\n");
 
 // 	switch(code){
 // 		case 0://mandar username
