@@ -68,12 +68,13 @@ struct ClientInformation
 void getUsers(int fd){
     char buffer[MAXDATASIZE];
     ConnectedUserResponse * cur(new ConnectedUserResponse);
-    ConnectedUser * conuser(new ConnectedUser);
-    conuser = cur->add_connectedusers();
+    
 
     for(int i=0;i<MAX_CLIENTS;i++){
         //cout << "fd: " << current_clients[i].fd <<"\n";
         if (current_clients[i].fd != -1 && current_clients[i].fd != fd){
+            ConnectedUser * conuser(new ConnectedUser);
+            conuser = cur->add_connectedusers();
             conuser->set_username(current_clients[i].username);
             conuser->set_status(current_clients[i].status);
             conuser->set_userid(current_clients[i].id);
@@ -111,9 +112,9 @@ void messageToSomeone(int fd, string mensaje,int userid){
             DirectMessage * DM(new DirectMessage);
             DM -> set_message(mensaje);
             DM -> set_userid(current_clients[i].id);
-
-            sm.set_option(2);
-            sm.set_allocated_message(DM);
+            ServerMessage sm2;
+            sm2.set_option(2);
+            sm2.set_allocated_message(DM);
             if(sm.has_option()){
                 string msg;
                 sm.SerializeToString(&msg);
