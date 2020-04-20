@@ -10,14 +10,13 @@
 // #include <json/json.h>
 
 #include "mensaje.pb.h"
-using namespace std;
 using namespace chat;
 
 using std::cout;
 using std::endl;
 using std::string;
 using std::cin;
-#define MAX 4096
+#define MAX_ 4096
 #define PORT 7070
 #define HOSTNAME "192.168.1.30"
 #define SA struct sockaddr
@@ -39,42 +38,42 @@ void parserFromServer(string buffer)
 	s.ParseFromString(buffer);
 	switch(s.option()){
 		case 1: // broadcast
-			cout << 'Mensaje al Grupo: \t' << endl;
-			cout << 'Enviado por: \t' << s.broadcast().userid() << endl;
-			cout << 'Mensaje: \t' << s.broadcast().message() << endl;
+			cout << "'Mensaje al Grupo: \t'" << endl;
+			cout << "'Enviado por: \t'" << s.broadcast().userid() << endl;
+			cout << "'Mensaje: \t'" << s.broadcast().message() << endl;
 			break;
 		case 2: // directmessage
-			cout << 'Mensaje Privado: \t' << endl;
-			cout << 'Enviado por: \t' << s.message().userid() <<endl;
-			cout << 'Mensaje: \t' << s.message().message() << endl;
+			cout << "'Mensaje Privado: \t'" << endl;
+			cout << "'Enviado por: \t'" << s.message().userid() <<endl;
+			cout << "'Mensaje: \t'" << s.message().message() << endl;
 			break;
 		case 3: // error
-			cout << 'Recibiendo Error' << endl;
-			cout << 'Servidor:\t' << endl;
-			cout << 'ERROR: \t' << s.error().errormessage() << endl;
+			cout << "'Recibiendo Error'" << endl;
+			cout << "'Servidor:\t'" << endl;
+			cout << "'ERROR: \t'" << s.error().errormessage() << endl;
 			break;
 		case 4: // myInfoResponse
-			cout << 'Recibiendo MY INFO RESP.' << endl;
-			cout << 'Servidor:\t' << endl;
+			cout << "'Recibiendo MY INFO RESP.'" << endl;
+			cout << "'Servidor:\t'" << endl;
 			cout << "ID: \t" << s.myinforesponse().userid() << endl;
 			break;
 		case 5: // connectedUserResponse
 
 			break;
 		case 6: // changeSatatusResponse
-			cout << 'Recibiendo ChangeStatusResponse: \t' << endl;
-			cout << 'Servidor: \t' << endl;
-			cout << 'ID: \t' << s.changestatusresponse().userid() << endl;
-			cout << 'Status: \t' << s.changestatusresponse().status() << endl;
+			cout << "'Recibiendo ChangeStatusResponse: \t'" << endl;
+			cout << "'Servidor: \t'" << endl;
+			cout << "'ID: \t'" << s.changestatusresponse().userid() << endl;
+			cout << "'Status: \t' "<< s.changestatusresponse().status() << endl;
 			break;
 		case 7: // broadcastRespnse (sent message status)
-			cout << 'Recibiendo BroadcastResponse \t' << endl;
-			cout << 'Servidor: \t' << endl;
-			cout << 'Mesage Status: \t' << s.broadcastresponse().messagestatus();
+			cout << "'Recibiendo BroadcastResponse \t'" << endl;
+			cout << "'Servidor: \t'" << endl;
+			cout << "'Mesage Status: \t'" << s.broadcastresponse().messagestatus();
 			break;
 		case 8: // directMessageResponse (sent message status)
-			cout << 'Recibiendo DirectMessageResponse \t' << endl;
-			cout << 'Servidor:\t' << endl;
+			cout << "'Recibiendo DirectMessageResponse \t'" << endl;
+			cout << "'Servidor:\t'" << endl;
 			cout << "Mesage Status: \t" << s.directmessageresponse().messagestatus() << endl;
 			break;
 	}
@@ -82,14 +81,16 @@ void parserFromServer(string buffer)
 }
 
 
-int main()
+int main(int argc, char *argv[])
 {
 	int fd;
 	int numbytes;
-	char buf[MAX];
+	char buf[MAX_];
 	struct hostent *he;
 	struct sockaddr_in server;
 
+	cout << "quepedo";
+	
 	if ((he = gethostbyname(HOSTNAME)) == NULL) {
 		err("gethostbyname");
 	}
@@ -106,9 +107,9 @@ int main()
 	if (connect(fd, (struct sockaddr *)&server, sizeof(struct sockaddr)) == -1) {
         err("connection with the server failed...");
     }
-
+    
 	// Inicia el three way handshake
-	cout << 'Inicia el 3w handshake' << endl;
+	cout << "'Inicia el 3w handshake'" << endl;
 	// MY INFO REQ
 	// Se crea instacia tipo MyInfoSynchronize y se setean los valores deseables
     MyInfoSynchronize * mySinc(new MyInfoSynchronize);
@@ -124,10 +125,10 @@ int main()
 	sprintf(buf,"%s",msg.c_str());
 	// Se envia el mensaje
     send(fd , buf , sizeof(buf) , 0 );
-	cout << 'Se envio el MY INFO REQ.' << endl;
+	cout << "'Se envio el MY INFO REQ.'" << endl;
 
 	// Para recibir un mensaje
-	numbytes = recv(fd, buf, MAX, 0);
+	numbytes = recv(fd, buf, MAX_, 0);
 	buf[numbytes] = '\0';
 	string data = buf;
 	// Se parcea la respuesta esperando que sea el MyInfoResponse
@@ -142,8 +143,8 @@ int main()
 	sprintf(buf,"%s",msg.c_str());
 	// Se envia el mensaje
     send(fd , buf , sizeof(buf) , 0 );
-	cout << 'Se envio el MY INFO ACK.' << endl;
-	cout << 'Se termino el 3w handshake' << endl;
+	cout << "'Se envio el MY INFO ACK.'" << endl;
+	cout << "'Se termino el 3w handshake'" << endl;
 	// Finaliza el 3w handshake
 
 
@@ -158,9 +159,9 @@ int main()
 	m.SerializeToString(&msg);
 	sprintf(buf,"%s",msg.c_str());
 	send(fd, buf, sizeof(buf), 0);
-	cout << 'Se envio el DirectMessageRequest' << endl;
+	cout << "'Se envio el DirectMessageRequest'" << endl;
 
-	numbytes = recv(fd, buf, MAX, 0);
+	numbytes = recv(fd, buf, MAX_, 0);
 	buf[numbytes] = '\0';
 	data = buf;
 	// Se parcea la respuesta esperando que sea un direct message response
@@ -169,7 +170,6 @@ int main()
 	// finalizacion del cliente
 	google::protobuf::ShutdownProtobufLibrary();
     return 1;
-
 	
 
 }

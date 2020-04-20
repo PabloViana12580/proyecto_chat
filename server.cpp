@@ -18,10 +18,10 @@ using std::string;
 using namespace chat;
 
 //Definimos variables globales del servidor
-#define MAX 1024
+#define MAX_ 1024
 #define PORT 7070
 #define SA struct sockaddr
-#define MAXCLIENTS 20
+#define MAX_CLIENTS 20
 #define BACKLOG 10 //cuantas conexiones pendientes va a aguantar el queue
 
 
@@ -36,18 +36,18 @@ struct ClientInformation
 	int last_connected;
 	string username;
 	ClientInformation():id(-1),fd(-1),status(-1),last_connected(1000){}
-}current_clients[MAXCLIENTS];
+}current_clients[MAX_CLIENTS];
 
 int checkUser(int fd, string username)
 {
-	if (clientnum > MAXCLIENTS){ // si aun hay espacio
+	if (clientnum > MAX_CLIENTS){ // si aun hay espacio
 		ErrorResponse er;
-		er.set_option(1);
+		//er.set_option(1);
 		return 1;
 	}
 
 	int i;
-	for(i=0;i<MAXCLIENTS;i++){
+	for(i=0;i<MAX_CLIENTS;i++){
 		if (current_clients[i].fd != -1 &&
 			username.compare(current_clients[i].username) == 0
 		){
@@ -59,15 +59,17 @@ int checkUser(int fd, string username)
 //Recibe clientMessage y dependiendo de la opcion discienre que accion del server ejecutar
 int managementServer(int fd)
 {
-	string buffer;
+	char * buffer = new char [MAX_];
 	int code, action;
 	read(fd,buffer,sizeof(buffer));
 	cout<<"buffer: "<<buffer<<"\n";
 
 	ClientMessage msgCliente;
-    msgCliente.ParseFromString(binary);
+    msgCliente.ParseFromString(buffer);
 
     code = msgCliente.option();
+
+    cout<<"code: "<<code<<"\n";
 
     switch(code)
     {
@@ -76,13 +78,14 @@ int managementServer(int fd)
     		action = 0;
     }
 
-    count<<"action"<<action<<"\n";
+    cout<<"action"<<action<<"\n";
 
     switch(action)
     {
     	case 0:
     	{
-    		//Iniciando conexion 
+    		//Iniciando conexion
+    		cout << "puto crack seguile dando";
     	}
     }
 }
