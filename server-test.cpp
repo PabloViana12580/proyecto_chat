@@ -103,9 +103,9 @@ void messageToSomeone(int fd, string mensaje,int userid){
             ServerMessage sm2;
             sm2.set_option(2);
             sm2.set_allocated_message(DM);
-            if(sm.has_option()){
+            if(sm2.has_option()){
                 string msg;
-                sm.SerializeToString(&msg);
+                sm2.SerializeToString(&msg);
                 sprintf(buffer,"%s",msg.c_str());
                 send(current_clients[i].fd, buffer, sizeof(buffer), 0);
                 cout << "Se envio Direct message" << endl;}
