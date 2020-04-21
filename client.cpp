@@ -24,6 +24,7 @@ using std::cout;
 using std::endl;
 using std::string;
 using std::cin;
+using std::strcpy;
 using namespace std;
 #define MAX_ 16384
 #define PORT 7070
@@ -97,6 +98,57 @@ int parserFromServer(string buffer)
 			return 0;
 	}
 	
+}
+
+void changestatus(int filedescriptor, string status){
+	int fd = filedescriptor;
+	char buf[MAX_];
+	ClientMessage m;
+	ChangeStatusRequest * myChangeStatus(new ChangeStatusRequest);
+	myChangeStatus->set_status(status);
+	m.set_option(3);
+	m.set_allocated_changestatus(myChangeStatus);
+	string msg;
+	m.SerializeToString(&msg);
+	sprintf(buf,"%s",msg.c_str());
+	send(fd, buf, sizeof(buf), 0);
+	cout << "Se envio el ChangeStatusRequest" << endl;
+	cout << "Esperando respuesta del servidor \n" << endl;
+}
+
+void sendbroadcast(int filedescriptor, string message){
+	int fd = filedescriptor;
+	char buf[MAX_];
+	ClientMessage m;
+	BroadcastRequest * myBroadcast(new BroadcastRequest);
+	myBroadcast->set_message(message);
+	m.Clear();
+	m.set_option(4);
+	m.set_allocated_broadcast(myBroadcast);
+	string msg;
+	m.SerializeToString(&msg);
+	sprintf(buf,"%s",msg.c_str());
+	send(fd, buf, sizeof(buf), 0);
+	cout << "Se envio el BroadcastRequest" << endl;
+	cout << "Esperando respuesta del servidor \n" << endl;
+}
+
+void sendmessage(int filedescriptor, int id, string message){
+	int fd = filedescriptor;
+	char buf[MAX_];
+	ClientMessage m;
+	DirectMessageRequest * myMessage(new DirectMessageRequest);
+	myMessage->set_message(message);
+	myMessage->set_userid(id);
+	m.Clear();
+	m.set_option(5);
+	m.set_allocated_directmessage(myMessage);
+	string msg;
+	m.SerializeToString(&msg);
+	sprintf(buf,"%s",msg.c_str());
+	send(fd, buf, sizeof(buf), 0);
+	cout << "Se envio el DirectMessageRequest" << endl;
+	cout << "Esperando respuesta del servidor \n" << endl;
 }
 
 
@@ -179,8 +231,6 @@ int main(int argc, char *argv[])
 	// inicializacion de instancias
 	connectedUserRequest * myUsersRequest(new connectedUserRequest);
 	ChangeStatusRequest * myChangeStatus(new ChangeStatusRequest);
-	BroadcastRequest * myBroadcast(new BroadcastRequest);
-	DirectMessageRequest * myMessage(new DirectMessageRequest);
 
 	char charInput;
 	string stringInput;
@@ -200,6 +250,7 @@ int main(int argc, char *argv[])
 		if (opcion == 1 ){ // connectedUserRequest
 			myUsersRequest->set_userid(0);
 			myUsersRequest->set_username(argv[2]);
+			m.Clear();
 			m.set_option(2);
 			m.set_allocated_connectedusers(myUsersRequest);
 			msg = "";
@@ -225,15 +276,8 @@ int main(int argc, char *argv[])
 			cout << "Ingrese su nuevo estado." << endl;
 			fflush( stdin );
 			getline(cin,stringInput);
-			myChangeStatus->set_status(stringInput);
-			m.set_option(3);
-			m.set_allocated_changestatus(myChangeStatus);
-			msg = "";
-			m.SerializeToString(&msg);
-			sprintf(buf,"%s",msg.c_str());
-			send(fd, buf, sizeof(buf), 0);
-			cout << "Se envio el ChangeStatusRequest" << endl;
-			cout << "Esperando respuesta del servidor \n" << endl;
+			cout << "Se ingreso:\t" << stringInput << endl;
+			changestatus(fd, stringInput);
 			esResponse = 1;
 			while(esResponse == 1)
 			{
@@ -251,15 +295,7 @@ int main(int argc, char *argv[])
 			cout << "Ingrese el mensaje que desea enviar" << endl;
 			fflush( stdin );
             getline(cin,stringInput);
-			myBroadcast->set_message(stringInput);
-			m.set_option(4);
-			m.set_allocated_broadcast(myBroadcast);
-			msg = "";
-			m.SerializeToString(&msg);
-			sprintf(buf,"%s",msg.c_str());
-			send(fd, buf, sizeof(buf), 0);
-			cout << "Se envio el BroadcastRequest" << endl;
-			cout << "Esperando respuesta del servidor \n" << endl;
+			sendbroadcast(fd,stringInput);
 			esResponse = 1;
 			while(esResponse == 1)
 			{
@@ -280,17 +316,19 @@ int main(int argc, char *argv[])
 			cout << "Ingrese el mensaje que desea enviar" << endl;
 			fflush( stdin );
             getline(cin,stringInput);
-			myMessage->set_message(stringInput);
-			myMessage->set_username(USER);
-			myMessage->set_userid(intInput);
-			m.set_option(5);
-			m.set_allocated_directmessage(myMessage);
-			msg = "";
-			m.SerializeToString(&msg);
-			sprintf(buf,"%s",msg.c_str());
-			send(fd, buf, sizeof(buf), 0);
-			cout << "Se envio el DirectMessageRequest" << endl;
-			cout << "Esperando respuesta del servidor \n" << endl;
+			sendmessage(fd,intInput,stringInput);
+			// myMessage->set_message(stringInput);
+			// myMessage->set_username(USER);
+			// myMessage->set_userid(intInput);
+			// m.Clear();
+			// m.set_option(5);
+			// m.set_allocated_directmessage(myMessage);
+			// msg = "";
+			// m.SerializeToString(&msg);
+			// sprintf(buf,"%s",msg.c_str());
+			// send(fd, buf, sizeof(buf), 0);
+			// cout << "Se envio el DirectMessageRequest" << endl;
+			// cout << "Esperando respuesta del servidor \n" << endl;
 			esResponse = 1;
 			while(esResponse == 1)
 			{

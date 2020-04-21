@@ -161,11 +161,13 @@ void changeStatus(int fd, string status){
         if(fd == current_clients[i].fd)
         {
             current_clients[i].status=status;
+            cout<< "current_clients[i].status: " << current_clients[i].status << endl;
             ChangeStatusResponse * MyResp(new ChangeStatusResponse);
             MyResp -> set_userid(current_clients[i].id);
             MyResp -> set_status(current_clients[i].status);
             
             ServerMessage sm;
+            sm.Clear();
             sm.set_option(6);
             sm.set_allocated_changestatusresponse(MyResp);
             if(sm.has_option()){
@@ -369,6 +371,7 @@ int managementServer(int fd)
         break;
         case 5:
         {
+            // cout << "directmessage: " << c.directmessage().has_username() << endl;
             messageToSomeone(fd, c.directmessage().message(), c.directmessage().userid());
         }
         break;
