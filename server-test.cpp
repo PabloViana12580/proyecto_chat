@@ -81,6 +81,7 @@ void getUsers(int fd){
 }
 
 void messageToSomeone(int fd, string mensaje,int userid){
+    cout << "mensaje: " << mensaje <<endl;
     char buffer[MAXDATASIZE];
     DirectMessageResponse * DirMes(new DirectMessageResponse);
     DirMes -> set_messagestatus("Mensaje recibido");
@@ -117,6 +118,7 @@ void messageToSomeone(int fd, string mensaje,int userid){
 }
 
 void messageToAll(int fd, string mensaje){
+    cout << "mensaje: " << mensaje <<endl;
     char buffer[MAXDATASIZE];
     BroadcastResponse * brodmsgr(new BroadcastResponse);
     brodmsgr -> set_messagestatus("Mensaje recibido");
@@ -152,6 +154,7 @@ void messageToAll(int fd, string mensaje){
 }
 
 void changeStatus(int fd, string status){
+    cout << "status: " << status <<endl;
     int i;
     char buffer[MAXDATASIZE];
     for(i=0;i<MAX_CLIENTS;i++){
@@ -478,7 +481,7 @@ int main(int argc, char** argv) {
         pthread_create(&conection_thread, NULL, conHandler, (void *)connectfd);
     }
 
-    close(listenfd);
+    //close(listenfd);
     //close(connectfd);
 
     return 0;
