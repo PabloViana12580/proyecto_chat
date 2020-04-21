@@ -183,6 +183,7 @@ int main(int argc, char *argv[])
 	DirectMessageRequest * myMessage(new DirectMessageRequest);
 
 	char charInput;
+	string stringInput;
 	int intInput;
 	int opcion;
 	int esResponse;
@@ -223,9 +224,8 @@ int main(int argc, char *argv[])
 		} else if (opcion == 2 ){ // changeStatus
 			cout << "Ingrese su nuevo estado." << endl;
 			fflush( stdin );
-            scanf( "%c", &charInput );
-			std::string s(sizeof(charInput), charInput);
-			myChangeStatus->set_status(s);
+			getline(cin,stringInput);
+			myChangeStatus->set_status(stringInput);
 			m.set_option(3);
 			m.set_allocated_changestatus(myChangeStatus);
 			msg = "";
@@ -250,9 +250,8 @@ int main(int argc, char *argv[])
 		} else if (opcion == 3 ){ //broadcast
 			cout << "Ingrese el mensaje que desea enviar" << endl;
 			fflush( stdin );
-            scanf( "%c", &charInput );
-			std::string s(sizeof(charInput), charInput);
-			myBroadcast->set_message(s);
+            getline(cin,stringInput);
+			myBroadcast->set_message(stringInput);
 			m.set_option(4);
 			m.set_allocated_broadcast(myBroadcast);
 			msg = "";
@@ -280,9 +279,8 @@ int main(int argc, char *argv[])
 			scanf("%d", &intInput);
 			cout << "Ingrese el mensaje que desea enviar" << endl;
 			fflush( stdin );
-            scanf( " %c", &charInput );
-			std::string s(sizeof(charInput), charInput);
-			myMessage->set_message(s);
+            getline(cin,stringInput);
+			myMessage->set_message(stringInput);
 			myMessage->set_username(USER);
 			myMessage->set_userid(intInput);
 			m.set_option(5);
