@@ -19,6 +19,7 @@ Oliver Mazariegos
 #include <string>
 #include <iostream>
 #include <string.h> 
+#include <sstream>
 #include <cstring>
 #include <cstdlib>
 
@@ -62,39 +63,85 @@ struct pthread_args
     string ip_address;
 };
 
+//struct para change status
+struct change_status
+{
+    string status;
+    int id;
+};
+
 /*
 CODIGO PARA ERRORES
 
 error1 - servidor lleno 
 error2 - usuario ya existe
+error3 - no se especifica el usuario al que se le quiere conocer la informacion
+error4 - id no pertenece a ningun usuario
 
 */
 
-void getUsers(int fd){
+void getUsers(int fd, int userid, string username){
+    ServerMessage * sm(new ServerMessage);
     char buffer[MAXDATASIZE];
     ConnectedUserResponse * cur(new ConnectedUserResponse);
-    
+    int i, bandera = 0;
+    if(userid == 0)
+    {    
+        for(i=0;i<MAX_CLIENTS;i++){
+            //cout << "fd: " << current_clients[i].fd <<"\n";
+            if (current_clients[i].fd != -1){
+                ConnectedUser * conuser;
+                conuser = cur->add_connectedusers();
+                ClientInformation tempClient = current_clients[i];
 
-    for(int i=0;i<MAX_CLIENTS;i++){
-        //cout << "fd: " << current_clients[i].fd <<"\n";
-        if (current_clients[i].fd != -1 && current_clients[i].fd != fd){
-            ConnectedUser * conuser(new ConnectedUser);
-            conuser = cur->add_connectedusers();
-            conuser->set_username(current_clients[i].username);
-            conuser->set_status(current_clients[i].status);
-            conuser->set_userid(current_clients[i].id);
+                conuser->set_username(tempClient.username);
+                conuser->set_userid(tempClient.id);
+                conuser->set_status(tempClient.status);
+                conuser->set_userid(tempClient.id);
+            }
+        }
+    }else{
+        for(i=0;i<MAX_CLIENTS;i++)
+        {
+            ClientInformation tempClient = current_clients[i];
+            if(tempClient.id == userid || tempClient.username.compare(username)==0)
+            {
+                ConnectedUser * conuser;
+                conuser = cur->add_connectedusers();
+                ClientInformation tempClient = current_clients[i];
+
+                conuser->set_username(tempClient.username);
+                conuser->set_userid(tempClient.id);
+                conuser->set_status(tempClient.status);
+                conuser->set_userid(tempClient.id);
+            }else{
+
+                ErrorResponse * MyError(new ErrorResponse);
+                MyError -> set_errormessage("error4");
+                sm->set_option(3);
+                sm->set_allocated_error(MyError);
+                string msg;
+                sm->SerializeToString(&msg);
+                sprintf(buffer,"%s",msg.c_str());
+                send(fd , buffer , sizeof(buffer) , 0 );
+                bandera = -1;
+                cout << "Se envio ERROR RESPONSE" << endl;
+
+            }
         }
     }
-
-    ServerMessage sm;
-    sm.set_option(5);
-    sm.set_allocated_connecteduserresponse(cur);
-    if(sm.has_option()){
-        string msg;
-        sm.SerializeToString(&msg);
-        sprintf(buffer,"%s",msg.c_str());
-        send(fd, buffer, sizeof(buffer), 0);
-        cout << "Se envio GET USERS" << endl;}
+    
+    if(bandera != -1)
+    {
+        sm->set_option(5);
+        sm->set_allocated_connecteduserresponse(cur);
+        if(sm->has_option()){
+            string msg;
+            sm->SerializeToString(&msg);
+            sprintf(buffer,"%s",msg.c_str());
+            send(fd, buffer, sizeof(buffer), 0);
+            cout << "Se envio GET USERS" << endl;}
+    }
 }
 
 void messageToSomeone(int fd, string mensaje,int userid){
@@ -169,36 +216,21 @@ void messageToAll(int fd, string mensaje){
         }
     }
 }
-
-void changeStatus(int fd, string status){
+change_status changeStatus(int fd, string status){
+    change_status cs;
+    cout <<"\n\n------------ Recibiendo Change Status Request ------------\n\n"<<endl;
     cout << "status: " << status <<endl;
     int i;
-    char buffer[MAXDATASIZE];
     for(i=0;i<MAX_CLIENTS;i++){
         if(fd == current_clients[i].fd)
         {
             current_clients[i].status=status;
-            cout<< "current_clients[i].status: " << current_clients[i].status << endl;
-            ChangeStatusResponse * MyResp(new ChangeStatusResponse);
-            MyResp -> set_userid(current_clients[i].id);
-            MyResp -> set_status(current_clients[i].status);
-            
-            ServerMessage sm;
-            sm.Clear();
-            sm.set_option(6);
-            sm.set_allocated_changestatusresponse(MyResp);
-            if(sm.has_option()){
-                string msg;
-                sm.SerializeToString(&msg);
-                sprintf(buffer,"%s",msg.c_str());
-                send(fd, buffer, sizeof(buffer), 0);
-                cout << "Se envio CHANGE STATUS" << endl;} 
-            
-            return; 
+            cout<< "current_clients[i].status: " << current_clients[i].status << "\n\n"<<endl;
+            cs.status = current_clients[i].status;
+            cs.id = current_clients[i].id;
+            return cs; 
         }
     }
-
-    return;
 }
 
 
@@ -259,6 +291,7 @@ int checkUser(int fd, string username, string ip)
             cout <<"------------ Chequeo de usuarios en servidor ------------"<<endl;
             cout <<"----------------- cliente numero: 0 -----------------"<<endl;
             cout<<"username:"<<current_clients[0].username<<endl;
+            cout<<"file descriptor:"<<current_clients[0].fd<<endl;
             cout<<"id:"<<current_clients[0].id<<endl;
             cout<<"status:"<<current_clients[0].status<<endl;
             cout<<"ip:"<<current_clients[0].ip<<endl;
@@ -266,6 +299,7 @@ int checkUser(int fd, string username, string ip)
 
             cout <<"----------------- cliente numero: 1 -----------------"<<endl;
             cout<<"username:"<<current_clients[1].username<<endl;
+            cout<<"file descriptor:"<<current_clients[1].fd<<endl;
             cout<<"id:"<<current_clients[1].id<<endl;
             cout<<"status:"<<current_clients[1].status<<endl;
             cout<<"ip:"<<current_clients[1].ip<<endl;
@@ -273,6 +307,7 @@ int checkUser(int fd, string username, string ip)
 
             cout <<"----------------- cliente numero: 2 -----------------"<<endl;
             cout<<"username:"<<current_clients[2].username<<endl;
+            cout<<"file descriptor:"<<current_clients[2].fd<<endl;
             cout<<"id:"<<current_clients[2].id<<endl;
             cout<<"status:"<<current_clients[2].status<<endl;
             cout<<"ip:"<<current_clients[2].ip<<endl;
@@ -293,6 +328,7 @@ int managementServer(int fd, string client_ip)
     char buffer[MAXDATASIZE];
     ServerMessage sm;
     ClientMessage c;
+    string msg;
     numbytes = recv(fd, buf, MAXDATASIZE, MSG_WAITALL);
     if(numbytes!=0  && numbytes!=-1)
     {    
@@ -313,13 +349,13 @@ int managementServer(int fd, string client_ip)
         break;
         case 2:
         {
-            cout << "Se detecta opcion numero 2 connectedUsers\n";
+            cout << "\n\nSe detecta opcion numero 2 connectedUsers\n\n";
             action = 2;
         }
         break;
         case 3:
         {
-            cout << "Se detecta opcion numero 3 changeStatus\n";
+            cout << "\n\nSe detecta opcion numero 3 changeStatus\n\n";
             action = 3;
         }
         break;
@@ -359,7 +395,6 @@ int managementServer(int fd, string client_ip)
 
                 sm.set_option(4);
                 sm.set_allocated_myinforesponse(MyInfo);
-                string msg;
                 sm.SerializeToString(&msg);
                 sprintf(buffer,"%s",msg.c_str());
                 send(fd , buffer , sizeof(buffer) , 0 );
@@ -373,15 +408,54 @@ int managementServer(int fd, string client_ip)
         case 2:
         {
             //aqui podria haber clavo porque no se si es connectedusers()
-            if(c.connectedusers().userid() == 0)
+            if(c.connectedusers().has_userid() == 1 && c.connectedusers().has_username() == 0)
             {
-                getUsers(fd);
+                getUsers(fd, c.connectedusers().userid(), "");
+
+            }else if (c.connectedusers().has_userid() == 0 && c.connectedusers().has_username() == 1)
+            {
+                getUsers(fd, 0, c.connectedusers().username());
+
+            }else if (c.connectedusers().has_userid() == 1 && c.connectedusers().has_username() == 1)
+            {
+                getUsers(fd, c.connectedusers().userid(), c.connectedusers().username());
+
+            }else{
+                ErrorResponse * MyError(new ErrorResponse);
+                MyError -> set_errormessage("error3");
+                sm.set_option(3);
+                sm.set_allocated_error(MyError);
+                string msg;
+                sm.SerializeToString(&msg);
+                sprintf(buffer,"%s",msg.c_str());
+                send(fd , buffer , sizeof(buffer) , 0 );
+                cout << "Se envio ERROR RESPONSE" << endl;
             }
+
+            code = 0;
+            action = 0;
+            return 0;
         }
         break;
         case 3: 
         {
-            changeStatus(fd, c.changestatus().status());
+            change_status changsta;
+            changsta = changeStatus(fd, c.changestatus().status());
+
+            ChangeStatusResponse * MyResp(new ChangeStatusResponse);
+            MyResp -> set_userid(changsta.id);
+            MyResp -> set_status(changsta.status);
+            
+            sm.set_option(6);
+            sm.set_allocated_changestatusresponse(MyResp);
+            sm.SerializeToString(&msg);
+            sprintf(buffer,"%s",msg.c_str());
+            send(fd, buffer, sizeof(buffer), 0);
+            cout << "Se envio CHANGE STATUS" << endl;
+
+            code = 0;
+            action = 0;
+            return 0;
         }
         break;
         case 4:
