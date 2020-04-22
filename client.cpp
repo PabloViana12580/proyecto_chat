@@ -193,6 +193,7 @@ void changestatus(int filedescriptor, string status){
 	send(fd, buf, sizeof(buf), 0);
 	cout << "Se envio el ChangeStatusRequest" << endl;
 	cout << "Esperando respuesta del servidor \n" << endl;
+	usleep(100000);
 }
 
 void sendbroadcast(int filedescriptor, string message){
@@ -256,8 +257,7 @@ void *menu(void *args){
 		} else if (opcion == 2 ){ // changeStatus
 			cout << "Ingrese su nuevo estado." << endl;
 			fflush( stdin );
-			getline(cin,stringInput);
-			cin.ignore();
+			cin >> stringInput;
 			changestatus(fd, stringInput);
 			continue;
 		} else if (opcion == 3 ){ //broadcast
