@@ -13,6 +13,8 @@
 #include <string>
 #include <pthread.h>
 #include <stdlib.h>
+#include <typeinfo>
+#include <errno.h>
 
 
 #include "mensaje.pb.h"
@@ -147,12 +149,15 @@ void parserFromServer(string buffer)
 void *listenServer(void *filedescriptor) {
 	//long fd = (long) filedescriptor;
 	int numbytes;
+	string data;
+	char buf[MAX_];
 	while(clientON){
-		char buf[MAX_] = {0};
 		numbytes = recv(fd, buf, MAX_, MSG_WAITALL);
 		if (buf != "\0") {
 			if (numbytes > 0) {
-				parserFromServer(buf);
+				buf[numbytes] = '\0';
+				data = buf;
+				parserFromServer(data);
 			} else {
 				cout << "SE DESCONECTO DEL SERVER!" << endl;
 				cout << "SALIENDO" << endl;
@@ -342,7 +347,7 @@ int main(int argc, char *argv[])
 	// Para recibir un mensaje
 	cout << "Esperando MY INFO RESPONSE DEL SERVIDOR" << endl;
 	while(numbytes==-1){
-		numbytes = recv(fd, buf, MAX_, 0);
+		numbytes = recv(fd, buf, MAX_, MSG_WAITALL);
 		buf[numbytes] = '\0';
 		data = buf;
 	}
