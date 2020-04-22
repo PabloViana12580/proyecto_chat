@@ -259,11 +259,32 @@ void *menu(void *args){
 		cout << "(5) Salir\t" << endl;
 		cout << "Escriba opción" << endl;
 		fflush( stdin );
-		scanf("%d",&opcion);
+		while(true)
+		{
+			cin >> opcion;
+			if(!cin)
+			{
+				cout << "Debes ingresar un numero"<<endl;
+				cin.clear();
+				cin.ignore(numeric_limits<streamsize>::max(),'\n');
+				continue;
+			}else break;
+		}
+		
 		if (opcion == 1 ){ // connectedUserRequest
 			cout << "Ingrese el id del usuario que quiere informacion o ingrese 0 para obtener todos los usuarios." << endl;
 			fflush( stdin );
-			cin >> intInput;
+			while(true)
+			{
+				cin >> intInput;
+				if(!cin)
+				{
+					cout << "Debes ingresar un numero"<<endl;
+					cin.clear();
+					cin.ignore(numeric_limits<streamsize>::max(),'\n');
+					continue;
+				}else break;
+			}
 			getuser(fd,intInput);
 			continue;
 		} else if (opcion == 2 ){ // changeStatus
@@ -282,7 +303,17 @@ void *menu(void *args){
 		} else if (opcion == 4 ){ //directmessage
 			cout << "Ingrese el id del usuario al que le quiere enviar un mensaje" << endl;
 			fflush( stdin );
-			scanf("%d", &intInput);
+			while(true)
+			{
+				cin >> intInput;
+				if(!cin)
+				{
+					cout << "Debes ingresar un numero"<<endl;
+					cin.clear();
+					cin.ignore(numeric_limits<streamsize>::max(),'\n');
+					continue;
+				}else break;
+			}
 			cout << "Ingrese el mensaje que desea enviar" << endl;
 			fflush( stdin );
 			cin.ignore();
