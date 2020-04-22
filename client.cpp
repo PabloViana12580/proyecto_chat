@@ -54,6 +54,7 @@ void parserFromServer(string buffer)
 	cout << "\n" << endl;
 	switch(s.option()){
 		case 1: // broadcast
+			cout << " ------------------- Mensaje entrante ----------------- \t" << endl;
 			cout << "Mensaje de grupo enviado por: \t" << endl;
 			cout << "ID: \t"  << s.broadcast().userid() << endl;
 			if (s.broadcast().has_username()){
@@ -125,8 +126,7 @@ void parserFromServer(string buffer)
 		case 6: // changeSatatusResponse
 			cout << "Recibiendo ChangeStatusResponse: \t" << endl;
 			cout << "ID: \t" << s.changestatusresponse().userid() << endl;
-			cout << "Status: \t "<< s.changestatusresponse().status() << endl;
-			cout << "\n" << endl;
+			cout << "Status: \t "<< s.changestatusresponse().status() << "\n" <<endl;
 			// return 0;
 			break;
 		case 7: // broadcastRespnse (sent message status)
@@ -219,6 +219,7 @@ void sendbroadcast(int filedescriptor, string message){
 	send(fd, buf, sizeof(buf), 0);
 	cout << "Se envio el BroadcastRequest" << endl;
 	cout << "Esperando respuesta del servidor \n" << endl;
+	usleep(100000);
 }
 
 void sendmessage(int filedescriptor, int id, string message){
@@ -271,8 +272,8 @@ void *menu(void *args){
 		} else if (opcion == 3 ){ //broadcast
 			cout << "Ingrese el mensaje que desea enviar" << endl;
 			fflush( stdin );
-            getline(cin,stringInput);
             cin.ignore();
+            getline(cin,stringInput);
 			sendbroadcast(fd,stringInput);
 			continue;
 		} else if (opcion == 4 ){ //directmessage
