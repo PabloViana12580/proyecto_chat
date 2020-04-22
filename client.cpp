@@ -90,6 +90,12 @@ void parserFromServer(string buffer)
 				cout << "cerrando cliente\n"<<endl;
 				clientON = 0;
 				exit(0);
+			}else if (s.error().errormessage().compare("error3")==0)
+			{
+				cout << "NO SE ESPECIFICA USUARIO AL CUAL SE DESEA CONOCER INFORMACION\n"<<endl;
+			}else if (s.error().errormessage().compare("error4")==0)
+			{
+				cout << "ID NO PERTENECE A NINGUN USUARIO\n"<<endl;
 			}
 			// return 50
 			break;
@@ -177,6 +183,7 @@ void getuser(int filedescriptor, int userid){
 	send(fd, buf, sizeof(buf), 0);
 	cout << "Se envio el connectedUserRequest" << endl;
 	cout << "Esperando respuesta del servidor \n" << endl;
+	usleep(100000);
 }
 
 void changestatus(int filedescriptor, string status){
@@ -251,7 +258,7 @@ void *menu(void *args){
 		if (opcion == 1 ){ // connectedUserRequest
 			cout << "Ingrese el id del usuario que quiere informacion o ingrese 0 para obtener todos los usuarios." << endl;
 			fflush( stdin );
-			scanf("%d", &intInput);
+			cin >> intInput;
 			getuser(fd,intInput);
 			continue;
 		} else if (opcion == 2 ){ // changeStatus
