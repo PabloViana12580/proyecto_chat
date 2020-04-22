@@ -182,11 +182,21 @@ void messageToSomeone(int fd, string mensaje,int userid){
 }
 
 void messageToAll(int fd, string mensaje){
+    int id_remitente;
+    string username_remitente;
+    for (int j = 0;j<MAX_CLIENTS;j++)
+    {
+        if(current_clients[j].fd == fd){
+            id_remitente = current_clients[j].id;
+            username_remitente = current_clients[j].username;
+        }
+    }
+    cout <<"\n\n------------ Recibiendo Broadcast Request ------------\n\n"<<endl;
     cout << "mensaje: " << mensaje <<endl;
+    ServerMessage sm;
     char buffer[MAXDATASIZE];
     BroadcastResponse * brodmsgr(new BroadcastResponse);
     brodmsgr -> set_messagestatus("Mensaje recibido");
-    ServerMessage sm;
     sm.set_option(7);
     sm.set_allocated_broadcastresponse(brodmsgr);
     if(sm.has_option()){
@@ -194,16 +204,17 @@ void messageToAll(int fd, string mensaje){
         sm.SerializeToString(&msg);
         sprintf(buffer,"%s",msg.c_str());
         send(fd, buffer, sizeof(buffer), 0);
-        cout << "Se envio Broadcast response" << endl;}
+        cout << "\nSe envio Broadcast response\n" << endl;}
 
+    cout <<"\n\n------------ Enviando mensaje a todos los usuarios ------------\n\n"<<endl;
     for(int i=0;i<MAX_CLIENTS;i++){
         if(current_clients[i].fd == fd){ // si es la persona que lo envio
             //serverResponse(current_clients[i].fd,"mensaje enviado",205);
         }else if(current_clients[i].fd != -1){ // si no esta asignado
             BroadcastMessage * brodmsg(new BroadcastMessage);
             brodmsg -> set_message(mensaje);
-            brodmsg -> set_userid(current_clients[i].id);
-            brodmsg -> set_username(current_clients[i].username);
+            brodmsg -> set_userid(id_remitente);
+            brodmsg -> set_username(username_remitente);
             sm.set_option(1);
             sm.set_allocated_broadcast(brodmsg);
             if(sm.has_option()){
@@ -361,7 +372,7 @@ int managementServer(int fd, string client_ip)
         break;
         case 4:
         {
-            cout << "Se detecta opcion numero 4 Broadcast\n";
+            cout << "\n\nSe detecta opcion numero 4 Broadcast\n\n";
             action = 4;
         }
         break;
@@ -461,12 +472,18 @@ int managementServer(int fd, string client_ip)
         case 4:
         {
             messageToAll(fd, c.broadcast().message());
+            code = 0;
+            action = 0;
+            return 0;
         }
         break;
         case 5:
         {
             // cout << "directmessage: " << c.directmessage().has_username() << endl;
             messageToSomeone(fd, c.directmessage().message(), c.directmessage().userid());
+            code = 0;
+            action = 0;
+            return 0;
         }
         break;
         default:
