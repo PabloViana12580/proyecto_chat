@@ -43,6 +43,7 @@ void sigchld_handler(int s) {
 int clientnum = 0;
 bool serverON = 1;
 
+//definimios una estructura para almacenar los clientes en el servidor
 struct ClientInformation
 { 
     int id;
@@ -50,8 +51,24 @@ struct ClientInformation
     string status; //0 activo, 1 ocupado, 2 desconectado
     string ip;
     string username;
-    ClientInformation():id(-1),fd(-1),status("disponible"),ip("localhost"){}
+    int time_connection;
+    ClientInformation():id(-1),fd(-1),status("disponible"),ip("localhost"),time_connection(1000){}
 }current_clients[MAX_CLIENTS];
+
+//Sctruct para multiples argumentos a pthread_create
+struct pthread_args
+{
+    long connectfd;
+    string ip_address;
+};
+
+/*
+CODIGO PARA ERRORES
+
+error1 - servidor lleno 
+error2 - usuario ya existe
+
+*/
 
 void getUsers(int fd){
     char buffer[MAXDATASIZE];
@@ -185,25 +202,14 @@ void changeStatus(int fd, string status){
 }
 
 
-int checkUser(int fd, string username)
+int checkUser(int fd, string username, string ip)
 {
     char buffer[MAXDATASIZE];
+    int i;
+    int bandera = 0;
     if (clientnum > MAX_CLIENTS){ // si aun hay espacio
-        /*
-            MyInfoResponse * MyInfo(new MyInfoResponse);
-            MyInfo -> set_userid(fd);
-
-            ServerMessage sm;
-            sm.set_option(4);
-            sm.set_allocated_myinforesponse(MyInfo);
-            string msg;
-            sm.SerializeToString(&msg);
-            sprintf(buffer,"%s",msg.c_str());
-            send(fd , buffer , sizeof(buffer) , 0 );
-            cout << "Se envio el MY INFO RESPONSE" << endl;
-        */
         ErrorResponse * MyError(new ErrorResponse);
-        MyError -> set_errormessage("Servidor lleno");
+        MyError -> set_errormessage("error1");
 
         ServerMessage sm;
         sm.set_option(3);
@@ -214,16 +220,16 @@ int checkUser(int fd, string username)
         send(fd , buffer , sizeof(buffer) , 0 );
         cout << "Se envio ERROR RESPONSE" << endl;
         //er.set_option(1);
+        bandera = 1;
         return 500;
     }
 
-    int i;
     for(i=0;i<MAX_CLIENTS;i++){
         if (current_clients[i].fd != -1 &&
             username.compare(current_clients[i].username) == 0
         ){
             ErrorResponse * MyError(new ErrorResponse);
-            MyError -> set_errormessage("Nombre de usuario ya existe");
+            MyError -> set_errormessage("error2");
 
             ServerMessage sm;
             sm.set_option(3);
@@ -233,64 +239,75 @@ int checkUser(int fd, string username)
             sprintf(buffer,"%s",msg.c_str());
             send(fd , buffer , sizeof(buffer) , 0 );
             cout << "Se envio ERROR RESPONSE" << endl;
+            bandera = 1;
             return 500;
         }
     }
 
     for(i=0;i<MAX_CLIENTS;i++){
-        cout<<"it:"<<i<<"\n";
-        cout<<"fd:"<<current_clients[i].fd<<"\n";
-        if(current_clients[i].fd == -1){
-            current_clients[i].id =i;
+        if(current_clients[i].fd == -1 && bandera != 1){
+            cout <<"-------- Registrando usuario en servidor --------"<<endl;
+            current_clients[i].id =i+1;
             current_clients[i].fd=fd;
             current_clients[i].username=username;
             current_clients[i].status = "disponible";
-            current_clients[i].ip = "localhost";
+            current_clients[i].ip = ip;
+            current_clients[i].time_connection = 0;
             
-            //char userInfo[MAX];
-            //strcpy(userInfo,json_object_to_json_string(jobj));
-            //strcpy(buff,createJson("user",userInfo).c_str());
-            cout<<"1:"<<current_clients[0].username<<"\n";
-            cout<<"2:"<<current_clients[1].username<<"\n";
-            cout<<"3:"<<current_clients[2].username<<"\n";
+            cout <<"------------ Registro completado ------------\n\n"<<endl;
+              
+            cout <<"------------ Chequeo de usuarios en servidor ------------"<<endl;
+            cout <<"----------------- cliente numero: 0 -----------------"<<endl;
+            cout<<"username:"<<current_clients[0].username<<endl;
+            cout<<"id:"<<current_clients[0].id<<endl;
+            cout<<"status:"<<current_clients[0].status<<endl;
+            cout<<"ip:"<<current_clients[0].ip<<endl;
+            cout<<"time connection:"<<current_clients[0].time_connection<<endl;
 
-            return i;   
-        }
+            cout <<"----------------- cliente numero: 1 -----------------"<<endl;
+            cout<<"username:"<<current_clients[1].username<<endl;
+            cout<<"id:"<<current_clients[1].id<<endl;
+            cout<<"status:"<<current_clients[1].status<<endl;
+            cout<<"ip:"<<current_clients[1].ip<<endl;
+            cout<<"time connection:"<<current_clients[1].time_connection<<endl;
+
+            cout <<"----------------- cliente numero: 2 -----------------"<<endl;
+            cout<<"username:"<<current_clients[2].username<<endl;
+            cout<<"id:"<<current_clients[2].id<<endl;
+            cout<<"status:"<<current_clients[2].status<<endl;
+            cout<<"ip:"<<current_clients[2].ip<<endl;
+            cout<<"time connection:"<<current_clients[2].time_connection<<"\n\n"<<endl;
+
+            return i+1; 
+        } 
     }
+
+    return 1;
 }
 
 //Recibe clientMessage y dependiendo de la opcion discienre que accion del server ejecutar
-int managementServer(int fd)
+int managementServer(int fd, string client_ip)
 {
     int numbytes,action,code,resp;
     char buf[MAXDATASIZE];
     char buffer[MAXDATASIZE];
+    ServerMessage sm;
     ClientMessage c;
     numbytes = recv(fd, buf, MAXDATASIZE, MSG_WAITALL);
-    if(numbytes!=0  && numbytes!=-1){    
+    if(numbytes!=0  && numbytes!=-1)
+    {    
         buf[numbytes] = '\0';
         string a = buf;
-                // cout << "Client Message: " << a << endl;
-        
-                // Receive  msg from clients
-                // demo::People p;
-                // p.ParseFromString(a);
-                // cout << "People:\t" << endl;
-                // cout << "Name:\t" << p.name() << endl;
-                // cout << "ID:\t" << p.id() << endl;
-                // cout << "Email:\t" << p.email() << endl;
-        
         c.ParseFromString(a);
         code = c.option();
         
-        cout<<"code: "<<code<<"\n";
-        
+        //cout<<"code: "<<code<<"\n";
     }
     switch(code)
     {
         case 1:
         { //conecction handshake "synchronize"
-            cout << "Se detecta opcion numero 1 synchronize\n";
+            cout << "\n\nSe detecta opcion numero 1 synchronize\n\n";
             action = 1;
         }
         break;
@@ -319,7 +336,8 @@ int managementServer(int fd)
         }
         case 6:
         {
-            cout << "Usuario conectado listo para chatear\n";
+            cout << "\n\nSe recibe  MY INFO ACK.\n";
+            cout << "Usuario conectado listo para chatear\n\n";
             code = 0;
 
         }
@@ -327,18 +345,18 @@ int managementServer(int fd)
     }
 
     if(numbytes!=0  && numbytes!=-1){
-        cout<<"action: "<<action<<"\n";
+        //cout<<"action: "<<action<<"\n";
     }
     switch(action)
     {
         case 1:
         {
-            resp = checkUser(fd,c.synchronize().username());
-            if(resp != 500){
+            resp = checkUser(fd,c.synchronize().username(), client_ip);
+            if(resp != 500)
+            {
                 MyInfoResponse * MyInfo(new MyInfoResponse);
                 MyInfo -> set_userid(resp);
 
-                ServerMessage sm;
                 sm.set_option(4);
                 sm.set_allocated_myinforesponse(MyInfo);
                 string msg;
@@ -346,8 +364,10 @@ int managementServer(int fd)
                 sprintf(buffer,"%s",msg.c_str());
                 send(fd , buffer , sizeof(buffer) , 0 );
                 cout << "Se envio el MY INFO RESPONSE" << endl;
-                action = 0;
-                return 0;
+            }
+            code = 0;
+            action = 0;
+            return 0;
         }
         break;
         case 2:
@@ -387,24 +407,24 @@ int managementServer(int fd)
         // sprintf(bts, "%s", data.c_str());
         // send(connectfd, bts, sizeof(bts), 0);
 
-        }
     }
 }
 
 
 
 //funcion que ejecutara cada thread, recibe el file descriptor que regresa accept()
-void *conHandler(void *filedescriptor)
+void *conHandler(void *arguments)
 {
-    //cout << 'aca toy' << endl;
+    struct pthread_args *arg = (struct pthread_args *)arguments;
     //Parseamos el parametro de void a long para usar el file descriptor
-    long connectfd = (long) filedescriptor;
-
+    long connectfd = arg -> connectfd;
+    //parseamos el parametro de voir a un struct para obtener el ip del cliente
+    string client = arg -> ip_address;
     //aumentamos el numero de conexiones activas en el server
     clientnum++;
 
     while(1) {
-        if(connectfd<0 || managementServer(connectfd) == 1)
+        if(connectfd<0 || managementServer(connectfd, client) == 1)
         {
             clientnum = clientnum - 1;
             //close(connectfd);
@@ -429,6 +449,8 @@ int main(int argc, char** argv) {
     struct sockaddr_in client;
     socklen_t sin_size;
     struct sigaction sa;
+    string client_ip;
+    struct pthread_args pargs;
 
     if ((listenfd = socket(AF_INET, SOCK_STREAM, 0)) == -1) {
         err("socket");
@@ -468,6 +490,9 @@ int main(int argc, char** argv) {
         sin_size = sizeof(struct sockaddr_in);
 
         connectfd = accept(listenfd, (struct sockaddr *)&client, &sin_size);
+        client_ip =  inet_ntoa(client.sin_addr);
+        pargs.connectfd = connectfd;
+        pargs.ip_address = client_ip;
         cout << "Server detected new connection\n";
 
         // // Send msg to clients
@@ -481,7 +506,7 @@ int main(int argc, char** argv) {
         // sprintf(bts, "%s", data.c_str());
         // send(connectfd, bts, sizeof(bts), 0);
         pthread_t conection_thread;
-        pthread_create(&conection_thread, NULL, conHandler, (void *)connectfd);
+        pthread_create(&conection_thread, NULL, conHandler, (void *)(&pargs));
     }
 
     //close(listenfd);
