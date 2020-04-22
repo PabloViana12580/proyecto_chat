@@ -201,6 +201,7 @@ void messageToSomeone(int fd, string mensaje,int userid){
         cout << "\nSe envio ERROR RESPONSE\n" << endl;
 
     return;
+    }
 }
 
 void messageToAll(int fd, string mensaje){
