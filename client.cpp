@@ -65,6 +65,7 @@ void parserFromServer(string buffer)
 			// return 1;
 			break;
 		case 2: // directmessage
+			cout << " ------------------- Mensaje entrante ----------------- \t" << endl;
 			cout << "Mensaje Privado enviado por: \t"  << endl;
 			cout << "ID: \t" << s.message().userid() << endl;
 			if (s.message().has_username()){
@@ -238,6 +239,7 @@ void sendmessage(int filedescriptor, int id, string message){
 	send(fd, buf, sizeof(buf), 0);
 	cout << "Se envio el DirectMessageRequest" << endl;
 	cout << "Esperando respuesta del servidor \n" << endl;
+	usleep(100000);
 }
 
 void *menu(void *args){
