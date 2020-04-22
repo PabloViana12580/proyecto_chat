@@ -56,13 +56,21 @@ void parserFromServer(string buffer)
 	cout << "\n" << endl;
 	switch(s.option()){
 		case 1: // broadcast
-			cout << "Mensaje al grupo enviado por: \t" << s.broadcast().userid() << endl;
+			cout << "Mensaje de grupo enviado por: \t" << endl;
+			cout << "ID: \t"  << s.broadcast().userid() << endl;
+			if (s.broadcast().has_username()){
+				cout << "Username:\t" << s.broadcast().username() << endl;
+			}
 			cout << "Mensaje: \t" << s.broadcast().message() << endl;
 			cout << "\n" << endl;
 			// return 1;
 			break;
 		case 2: // directmessage
-			cout << "Mensaje Privado enviado por: \t" << s.message().userid() <<endl;
+			cout << "Mensaje Privado enviado por: \t"  << endl;
+			cout << "ID: \t" << s.message().userid() << endl;
+			if (s.message().has_username()){
+				cout << "Username:\t" << s.message().username() << endl;				
+			}
 			cout << "Mensaje: \t" << s.message().message() << endl;
 			cout << "\n" << endl;
 			// return 1;
@@ -84,10 +92,17 @@ void parserFromServer(string buffer)
 			cout << "Recibiendo connectedUserResponse" << endl;
 			cout << "Cantidad de usuarios:\t" << s.connecteduserresponse().connectedusers_size() << endl;
 			for (int j = 0; j < s.connecteduserresponse().connectedusers_size(); j++){
-				cout << "UserID: " << s.connecteduserresponse().connectedusers(j).userid() << endl;
-				cout << "Username: " << s.connecteduserresponse().connectedusers(j).username() << endl;
-				cout << "Status: " << s.connecteduserresponse().connectedusers(j).status() << endl;
-
+				ConnectedUser usuario = s.connecteduserresponse().connectedusers(j);
+				if (usuario.has_userid()){
+					cout << "UserID: " << usuario.userid() << endl;
+				}
+				cout << "Username: " << usuario.username() << endl;
+				if (usuario.has_status()){
+					cout << "Status: " << usuario.status() << endl;
+				}
+				if (usuario.has_ip()){
+					cout << "IP: " << usuario.ip() << endl;
+				}
 			}
 			cout << "\n" << endl;
 			// return 0;
