@@ -89,7 +89,7 @@ void getUsers(int fd, int userid, string username){
     {    
         for(i=0;i<MAX_CLIENTS;i++){
             //cout << "fd: " << current_clients[i].fd <<"\n";
-            if (current_clients[i].fd != -1){
+            if (current_clients[i].fd != -1 && current_clients[i].fd != fd){
                 ConnectedUser * conuser;
                 conuser = cur->add_connectedusers();
                 ClientInformation tempClient = current_clients[i];
@@ -129,7 +129,7 @@ void getUsers(int fd, int userid, string username){
             sm->SerializeToString(&msg);
             sprintf(buffer,"%s",msg.c_str());
             send(fd, buffer, sizeof(buffer), 0);
-            cout << "Se envio GET USERS" << endl;}
+            cout << "\nSe envio GET USERS\n" << endl;}
     }else{
         ErrorResponse * MyError(new ErrorResponse);
         MyError -> set_errormessage("error4");
@@ -140,44 +140,69 @@ void getUsers(int fd, int userid, string username){
         sprintf(buffer,"%s",msg.c_str());
         send(fd , buffer , sizeof(buffer) , 0 );
         bandera = -1;
-        cout << "Se envio ERROR RESPONSE" << endl;
+        cout << "\nSe envio ERROR RESPONSE\n" << endl;
     }
+    return;
 }
 
 void messageToSomeone(int fd, string mensaje,int userid){
+    int id_remitente;
+    string username_remitente;
+    for(int j=0;j<MAX_CLIENTS;j++)
+    {
+        if(current_clients[j].fd == fd)
+        {
+            id_remitente = current_clients[j].id;
+            username_remitente = current_clients[j].username;
+        }
+    }
+    int bandera = 0;
     cout << "mensaje: " << mensaje <<endl;
     char buffer[MAXDATASIZE];
     DirectMessageResponse * DirMes(new DirectMessageResponse);
-    DirMes -> set_messagestatus("Mensaje recibido");
+    DirMes -> set_messagestatus("Mensaje enviado");
 
     ServerMessage sm;
     sm.set_option(8);
     sm.set_allocated_directmessageresponse(DirMes);
-    if(sm.has_option()){
+    string msg;
+    sm.SerializeToString(&msg);
+    sprintf(buffer,"%s",msg.c_str());
+    send(fd, buffer, sizeof(buffer), 0);
+    cout << "\nSe envio Direct message response\n" << endl;
+
+    for(int i=0;i<MAX_CLIENTS;i++){
+        if(current_clients[i].id == userid)
+        {
+            DirectMessage * DM(new DirectMessage);
+            DM -> set_message(mensaje);
+            DM -> set_userid(id_remitente);
+            DM -> set_username(username_remitente);
+            sm.Clear();
+            sm.set_option(2);
+            sm.set_allocated_message(DM);
+            string msg;
+            sm.SerializeToString(&msg);
+            sprintf(buffer,"%s",msg.c_str());
+            send(current_clients[i].fd, buffer, sizeof(buffer), 0);
+            cout << "\nSe envio Direct message\n" << endl;
+            bandera = 1;
+        }
+
+    }
+    if(bandera == 0)
+    {
+        ErrorResponse * MyError(new ErrorResponse);
+        MyError -> set_errormessage("error4");
+        sm.set_option(3);
+        sm.set_allocated_error(MyError);
         string msg;
         sm.SerializeToString(&msg);
         sprintf(buffer,"%s",msg.c_str());
-        send(fd, buffer, sizeof(buffer), 0);
-        cout << "Se envio Direct message response" << endl;}
-
-    for(int i=0;i<MAX_CLIENTS;i++){
-        if(current_clients[i].id == userid){ // no esta asignado
-            DirectMessage * DM(new DirectMessage);
-            DM -> set_message(mensaje);
-            DM -> set_userid(current_clients[i].id);
-            ServerMessage sm2;
-            sm2.set_option(2);
-            sm2.set_allocated_message(DM);
-            if(sm2.has_option()){
-                string msg;
-                sm2.SerializeToString(&msg);
-                sprintf(buffer,"%s",msg.c_str());
-                send(current_clients[i].fd, buffer, sizeof(buffer), 0);
-                cout << "Se envio Direct message" << endl;}
-            return;
-        }
+        send(fd , buffer , sizeof(buffer) , 0 );
+        cout << "\nSe envio ERROR RESPONSE\n" << endl;
     }
-
+  
     return;
 }
 
@@ -378,7 +403,7 @@ int managementServer(int fd, string client_ip)
         break;
         case 5:
         {
-           cout << "Se detecta opcion numero 5 Direct Message\n";
+           cout << "\n\nSe detecta opcion numero 5 Direct Message\n\n";
            action = 5;
         }
         case 6:
