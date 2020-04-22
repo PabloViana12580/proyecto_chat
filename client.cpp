@@ -77,9 +77,20 @@ void parserFromServer(string buffer)
 			break;
 		case 3: // error
 			cout << "Recibiendo Error" << endl;
-			cout << "ERROR: \t" << s.error().errormessage() << endl;
-			cout << "\n" << endl;
-			cout << "cerrando cliente\n"<<endl;
+			cout << "ERROR: \t" << s.error().errormessage() <<"\n"<< endl;
+			if(s.error().errormessage().compare("error1")==0)
+			{
+				cout << "SERVIDOR LLENO\n"<<endl;
+				cout << "cerrando cliente\n"<<endl;
+				clientON = 0;
+				exit(0);
+			}else if (s.error().errormessage().compare("error2")==0)
+			{
+				cout << "USUARIO YA EXISTE\n"<<endl;
+				cout << "cerrando cliente\n"<<endl;
+				clientON = 0;
+				exit(0);
+			}
 			// return 50
 			break;
 		case 4: // myInfoResponse
@@ -131,12 +142,12 @@ void parserFromServer(string buffer)
 	
 }
 
-void *listenServer(void *args) {
-	// long fd = (long) filedescriptor;
+void *listenServer(void *filedescriptor) {
+	//long fd = (long) filedescriptor;
 	int numbytes;
 	while(clientON){
 		char buf[MAX_] = {0};
-		numbytes = recv(fd, buf, MAX_, 0);
+		numbytes = recv(fd, buf, MAX_, MSG_WAITALL);
 		if (buf != "\0") {
 			if (numbytes > 0) {
 				parserFromServer(buf);
@@ -246,12 +257,14 @@ void *menu(void *args){
 			cout << "Ingrese su nuevo estado." << endl;
 			fflush( stdin );
 			getline(cin,stringInput);
+			cin.ignore();
 			changestatus(fd, stringInput);
 			continue;
 		} else if (opcion == 3 ){ //broadcast
 			cout << "Ingrese el mensaje que desea enviar" << endl;
 			fflush( stdin );
             getline(cin,stringInput);
+            cin.ignore();
 			sendbroadcast(fd,stringInput);
 			continue;
 		} else if (opcion == 4 ){ //directmessage
@@ -260,6 +273,7 @@ void *menu(void *args){
 			scanf("%d", &intInput);
 			cout << "Ingrese el mensaje que desea enviar" << endl;
 			fflush( stdin );
+			cin.ignore();
             getline(cin,stringInput);
 			sendmessage(fd,intInput,stringInput);
 			continue;
@@ -345,11 +359,12 @@ int main(int argc, char *argv[])
 	cout << "TERMINA THREE WAY HANDSHAKE.\n" << endl;
 	// Finaliza el 3w handshake}
 
+
 	pthread_t menu_thread;
 	pthread_t parser_thread;
 
 	pthread_create(&menu_thread,NULL,menu,NULL);
-	pthread_create(&parser_thread,NULL,listenServer,NULL);
+	pthread_create(&parser_thread,NULL,listenServer,(void *)(&fd));
 
 	pthread_join(menu_thread,NULL);
 	pthread_join(parser_thread,NULL);
