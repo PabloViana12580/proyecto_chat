@@ -97,41 +97,30 @@ void getUsers(int fd, int userid, string username){
                 conuser->set_username(tempClient.username);
                 conuser->set_userid(tempClient.id);
                 conuser->set_status(tempClient.status);
-                conuser->set_userid(tempClient.id);
             }
         }
+        bandera = 1;
     }else{
         for(i=0;i<MAX_CLIENTS;i++)
         {
             ClientInformation tempClient = current_clients[i];
-            if(tempClient.id == userid || tempClient.username.compare(username)==0)
+            if (tempClient.fd != -1)
             {
-                ConnectedUser * conuser;
-                conuser = cur->add_connectedusers();
-                ClientInformation tempClient = current_clients[i];
-
-                conuser->set_username(tempClient.username);
-                conuser->set_userid(tempClient.id);
-                conuser->set_status(tempClient.status);
-                conuser->set_userid(tempClient.id);
-            }else{
-
-                ErrorResponse * MyError(new ErrorResponse);
-                MyError -> set_errormessage("error4");
-                sm->set_option(3);
-                sm->set_allocated_error(MyError);
-                string msg;
-                sm->SerializeToString(&msg);
-                sprintf(buffer,"%s",msg.c_str());
-                send(fd , buffer , sizeof(buffer) , 0 );
-                bandera = -1;
-                cout << "Se envio ERROR RESPONSE" << endl;
-
+                if(tempClient.id == userid || tempClient.username.compare(username)==0)
+                {
+                    ConnectedUser * conuser;
+                    conuser = cur->add_connectedusers();
+                    conuser->set_username(tempClient.username);
+                    conuser->set_userid(tempClient.id);
+                    conuser->set_status(tempClient.status);
+                    bandera = 1;
+                    break;
+                }
             }
         }
     }
     
-    if(bandera != -1)
+    if(bandera == 1)
     {
         sm->set_option(5);
         sm->set_allocated_connecteduserresponse(cur);
@@ -141,6 +130,17 @@ void getUsers(int fd, int userid, string username){
             sprintf(buffer,"%s",msg.c_str());
             send(fd, buffer, sizeof(buffer), 0);
             cout << "Se envio GET USERS" << endl;}
+    }else{
+        ErrorResponse * MyError(new ErrorResponse);
+        MyError -> set_errormessage("error4");
+        sm->set_option(3);
+        sm->set_allocated_error(MyError);
+        string msg;
+        sm->SerializeToString(&msg);
+        sprintf(buffer,"%s",msg.c_str());
+        send(fd , buffer , sizeof(buffer) , 0 );
+        bandera = -1;
+        cout << "Se envio ERROR RESPONSE" << endl;
     }
 }
 
