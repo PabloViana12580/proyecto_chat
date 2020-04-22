@@ -28,7 +28,7 @@ using std::cin;
 using std::strcpy;
 using namespace std;
 #define MAX_ 16384
-#define PORT 7070
+//#define PORT 7070
 #define HOSTNAME "192.168.1.6"
 #define SA struct sockaddr
 #define bzero(b,len) (memset((b), '\0', (len)), (void) 0)
@@ -307,7 +307,7 @@ int main(int argc, char *argv[])
 	struct hostent *he;
 	struct sockaddr_in server;
 	
-	if ((he = gethostbyname(argv[1])) == NULL) {
+	if ((he = gethostbyname(argv[2])) == NULL) {
 		err("gethostbyname");
 	}
 
@@ -317,7 +317,7 @@ int main(int argc, char *argv[])
 
 	bzero(&server,sizeof(server));
 	server.sin_family = AF_INET;
-	server.sin_port = htons(PORT);
+	server.sin_port = htons(argv[3]);
 	server.sin_addr = *((struct in_addr *)he->h_addr);
 
 	if (connect(fd, (struct sockaddr *)&server, sizeof(struct sockaddr)) == -1) {
@@ -329,7 +329,7 @@ int main(int argc, char *argv[])
 	// MY INFO REQ
 	// Se crea instacia tipo MyInfoSynchronize y se setean los valores deseables
     MyInfoSynchronize * mySinc(new MyInfoSynchronize);
-    mySinc->set_username(argv[2]);
+    mySinc->set_username(argv[1]);
     mySinc->set_ip("127.0.0.1");
 	// Para enviar un mensaje
     // Se crea instancia de Mensaje, se setea los valores deseados

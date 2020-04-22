@@ -26,7 +26,7 @@ Oliver Mazariegos
 
 #include "mensaje.pb.h"
 
-#define PORT 7070           // the port users will be connecting to
+//#define PORT 7070           // the port users will be connecting to
 #define MAXDATASIZE 16384    // max number of bytes we can send at once
 #define BACKLOG 10          // how many pending connections queue will hold
 #define MAX_CLIENTS 20
@@ -554,7 +554,7 @@ int main(int argc, char** argv) {
 
     bzero(&server, sizeof(server));
     server.sin_family = AF_INET;                // host byte order
-    server.sin_port = htons(PORT);              // short, network byte order
+    server.sin_port = htons(argv[1]);              // short, network byte order
     server.sin_addr.s_addr = htonl(INADDR_ANY); // automatically fill with my IP
 
     if (bind(listenfd, (struct sockaddr *)&server, sizeof(struct sockaddr)) == -1) {
