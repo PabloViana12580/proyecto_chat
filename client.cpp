@@ -320,9 +320,9 @@ int main(int argc, char *argv[])
 	server.sin_family = AF_INET;
 	char *end;
 	intmax_t puerto_ = strtoimax(argv[3],&end,10);
-	uint16_t *puerto;
-	*puerto = (uint16_t) puerto_;
-	server.sin_port = htons(*puerto);
+	uint16_t puerto;
+	puerto = (uint16_t) puerto_;
+	server.sin_port = htons(puerto);
 	server.sin_addr = *((struct in_addr *)he->h_addr);
 
 	if (connect(fd, (struct sockaddr *)&server, sizeof(struct sockaddr)) == -1) {
