@@ -7,4 +7,4 @@
 #### Instrucciones para correr el cliente: `./cliente <username> <ip_server> <puerto>`
 
 #### Instrucciones para compilar el server-test: `g++ server-test.cpp mensaje.pb.cc -lprotobuf -o server -pthread -std=c++11`
-#### Instrucciones para correr el server: ./server <puerto>
+#### Instrucciones para correr el server: `./server <puerto>`
